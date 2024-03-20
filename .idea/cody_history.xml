@@ -148,6 +148,28 @@
           </messages>
           <updatedAt value="2024-03-19T23:50:08.830662" />
         </chat>
+        <chat>
+          <accountId value="VXNlcjozNTE4Nzg=" />
+          <internalId value="05e683ef-1dd6-4b34-b6a2-6ecc1c818693" />
+          <llm>
+            <llm>
+              <model value="anthropic/claude-2.0" />
+              <provider value="Anthropic" />
+              <title value="Claude 2.0" />
+            </llm>
+          </llm>
+        </chat>
+        <chat>
+          <accountId value="VXNlcjozNTE4Nzg=" />
+          <internalId value="100f0d28-16a3-44be-935d-bbe41bc22984" />
+          <llm>
+            <llm>
+              <model value="anthropic/claude-2.0" />
+              <provider value="Anthropic" />
+              <title value="Claude 2.0" />
+            </llm>
+          </llm>
+        </chat>
       </list>
     </chats>
   </component>

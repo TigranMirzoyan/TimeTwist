@@ -33,9 +33,8 @@ public class MainActivity extends AppCompatActivity {
         replace(currentFragment);
         setupBottomBarItemSelection();
 
-    }//============================onCreate End============================
+    }
 
-    //----------------------------------Logic----------------------------------
     private void replace(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                 .hide(currentFragment)
@@ -78,6 +77,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    //--------------------------------Logic End--------------------------------
 
-}//==============================Code End==============================
+}

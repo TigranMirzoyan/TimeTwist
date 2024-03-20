@@ -35,69 +35,44 @@ import java.util.Arrays;
 
 
 public class MapFragment extends Fragment {
+    public static final int COMPASS_ID = 1;
+    public static final int LOCATION_COMPASS_ID = 5;
+    public static final int LAT_LNG_ZOOM = 15;
+
     private GoogleMap mMap;
-    private AutocompleteSupportFragment autocompleteFragment;
-    private FusedLocationProviderClient fusedLocationClient;
-    private Button myLocationButton;
-    private boolean isAtCurrentLocation = false;
-    private LatLng currentLatLng;
+    private AutocompleteSupportFragment mAutocompleteFragment;
+    private FusedLocationProviderClient mFusedLocationClient;
+    private Button mMyLocationButton;
+    private boolean mIsAtCurrentLocation;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
-        myLocationButton = view.findViewById(R.id.myLocationBtn);
-
+        mMyLocationButton = view.findViewById(R.id.myLocationBtn);
         return view;
-
-
-    }//==========================onCreateView End==========================
+    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-
-        autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
-        autocompletePlace();
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-
-        supportMapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                mMap = googleMap;
-
-                permissionscheck();
-                UiSettings();
-                Buttons();
-                setupMapListeners();
-                getCurrentLocation();
-            }
-        });
-    }//==========================onViewCreated End==========================
-
-    //-----------------------------Permissions---------------------------------
-    public void permissionscheck() {
-        if (!Places.isInitialized()) {
-            Places.initialize(requireActivity().getApplicationContext(), getString(R.string.my_map_Api_key));
-        }
-
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-        }
+        configureAutocomplete();
+        configureFusedLocationClient();
     }
-    //---------------------------Permissions End-------------------------------
 
-    //--------------------------AutoComplete Fragment--------------------------
-    public void autocompletePlace() {
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+    private void configureFusedLocationClient() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this::onMapReady);
+    }
+
+    private void configureAutocomplete() {
+        mAutocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+        mAutocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+        mAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
                 LatLng latLng = place.getLatLng();
                 if (latLng != null && mMap != null) {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, LAT_LNG_ZOOM));
                 }
             }
 
@@ -106,88 +81,81 @@ public class MapFragment extends Fragment {
             }
         });
     }
-    //------------------------AutoComplete Fragment End------------------------
 
-    //---------------------------UiSettings Control----------------------------
-    public void UiSettings() {
+    private void onMapReady(GoogleMap map) {
+        mMap = map;
+        initializePlaces();
+        tryEnablingMyLocation();
+        configureUi();
+        configureMyLocationButton();
+        configureMap();
+        updateLocation(() -> Toast.makeText(requireContext(), "Location unavailable", Toast.LENGTH_SHORT).show());
+    }
 
-        View compass = getView().findViewById(Integer.parseInt("1"));
-        if (compass != null) {
-            View locationCompass = ((View) compass.getParent()).findViewById(Integer.parseInt("5"));
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) locationCompass.getLayoutParams();
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-            layoutParams.setMargins(30, 0, 0, 100);
-            locationCompass.setLayoutParams(layoutParams);
+    private void initializePlaces() {
+        if (!Places.isInitialized()) {
+            Places.initialize(requireActivity().getApplicationContext(), getString(R.string.my_map_Api_key));
         }
+    }
 
+    private void tryEnablingMyLocation() {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
+    }
+
+    private void configureUi() {
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
-    }
-    //-------------------------UiSettings Control End--------------------------
-
-    //---------------------------------Buttons---------------------------------
-    public void Buttons() {
-        myLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                moveToCurrentLocation();
-            }
-        });
-    }
-    //-------------------------------Buttons End-------------------------------
-
-    //----------------------------------Logic----------------------------------
-
-        //****************************MyLocation Button****************************
-    private void moveToCurrentLocation() {
-        fusedLocationClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
-            if (location != null) {
-                LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                isAtCurrentLocation = true;
-                updateMyLocationButtonDrawable();
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-            } else {
-                Log.d("MapFragment", "Current location is null.");
-                Toast.makeText(requireContext(), "Pls on the Gps", Toast.LENGTH_LONG).show();
-            }
-        });
+        View compass = getView().findViewById(COMPASS_ID);
+        if (compass == null) {
+            return;
+        }
+        View locationCompass = ((View) compass.getParent()).findViewById(LOCATION_COMPASS_ID);
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) locationCompass.getLayoutParams();
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        layoutParams.setMargins(30, 0, 0, 100);
+        locationCompass.setLayoutParams(layoutParams);
     }
 
-    private void setupMapListeners() {
+    private void configureMyLocationButton() {
+        mMyLocationButton.setOnClickListener(__ -> moveToCurrentLocation());
+    }
+
+    private void configureMap() {
         mMap.setOnCameraMoveStartedListener(reason -> {
             if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
-                isAtCurrentLocation = false;
+                mIsAtCurrentLocation = false;
                 updateMyLocationButtonDrawable();
             }
+        });
+    }
+
+    private void moveToCurrentLocation() {
+        updateLocation(() -> {
+            Log.d("MapFragment", "Current location is null.");
+            Toast.makeText(requireContext(), "Pls on the Gps", Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private void updateLocation(Runnable ifLocationIsNull) {
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
+            if (location == null) {
+                ifLocationIsNull.run();
+                return;
+            }
+            mIsAtCurrentLocation = true;
+            updateMyLocationButtonDrawable();
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, LAT_LNG_ZOOM));
         });
     }
 
     private void updateMyLocationButtonDrawable() {
-        if (isAtCurrentLocation) {
-            myLocationButton.setBackground(getResources().getDrawable(R.drawable.my_location_visible));
-        } else {
-            myLocationButton.setBackground(getResources().getDrawable(R.drawable.my_location_not_visible));
-        }
+        mMyLocationButton.setBackground(getResources().getDrawable(mIsAtCurrentLocation
+                ? R.drawable.my_location_visible
+                : R.drawable.my_location_not_visible));
     }
-
-    private void getCurrentLocation() {
-
-        fusedLocationClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
-            if (location != null) {
-                currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                isAtCurrentLocation = true;
-                updateMyLocationButtonDrawable();
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-
-            } else {
-
-                Toast.makeText(requireContext(), "Location unavailable", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-        //****************************MyLocation Button End*************************
-
-    //--------------------------------Logic End--------------------------------
 
 }//==============================Code End==============================
