@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">TimeTwist</string>
     <string name="my_map_Api_key">AIzaSyCCmIaUzr43cDsJmXee0li1d1aoq9SffKQ</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

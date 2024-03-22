@@ -8,5 +8,8 @@
     <color name="turquoise">#48D1CC</color>
     <color name="light_grayish_cyan">#E0F7FA</color>
     <color name="grey">#505050</color>
-    <color name="capri">#03A9F4</color>
+    <color name="capri">#5781f1</color>
+    <color name="dark_blue">#18373d</color>
+    <color name="blue">#164953</color>
+    <color name="background_color">#fff1e1</color>
 </resources>
