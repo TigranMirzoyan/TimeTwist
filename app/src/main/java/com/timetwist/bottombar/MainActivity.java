@@ -1,4 +1,4 @@
-package com.timetwist;
+package com.timetwist.bottombar;
 
 import android.os.Bundle;
 
@@ -9,10 +9,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.timetwist.R;
 import com.timetwist.account.LoginRegisterFragment;
-import com.timetwist.bottombar.HomeFragment;
-import com.timetwist.bottombar.MapFragment;
-import com.timetwist.bottombar.ProfileFragment;
 
 import nl.joery.animatedbottombar.AnimatedBottomBar;
 
@@ -38,26 +36,28 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
 
         replace(currentFragment);
+        chooseFragment();
         setupBottomBarItemSelection();
 
     }
 
     public void replace(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction()
-                .hide(currentFragment)
-                .commit();
-
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        if (currentFragment != null) {
+            transaction.hide(currentFragment);
+        }
 
         if (!fragment.isAdded()) {
             transaction.add(R.id.frameLayout, fragment);
+        } else {
+            transaction.show(fragment);
         }
 
-        transaction.show(fragment);
         transaction.commit();
-
         currentFragment = fragment;
     }
+
 
     private void setupBottomBarItemSelection() {
         bottomBar.setOnTabSelectListener(new AnimatedBottomBar.OnTabSelectListener() {
@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(int i, @Nullable AnimatedBottomBar.Tab tab, int i1, @NonNull AnimatedBottomBar.Tab tab1) {
                 Fragment selectedFragment = null;
+
 
                 if (tab1.getId() == R.id.home) {
                     selectedFragment = homeFragment;
@@ -89,4 +90,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void chooseFragment() {
+        boolean openProfileFragment = getIntent().getBooleanExtra("OpenProfileFragment", false);
+        if (!openProfileFragment) {
+            return;
+        }
+
+        bottomBar.selectTabById(R.id.profile, false);
+        Fragment selectedFragment;
+        if (mAuth.getCurrentUser() == null) {
+            selectedFragment = loginRegisterFragment;
+        } else {
+            selectedFragment = profileFragment;
+        }
+        replace(selectedFragment);
+    }
 }

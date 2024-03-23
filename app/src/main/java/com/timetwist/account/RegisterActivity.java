@@ -12,7 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.timetwist.MainActivity;
+import com.timetwist.bottombar.MainActivity;
 import com.timetwist.R;
 
 import java.util.Objects;
@@ -68,17 +68,12 @@ public class RegisterActivity extends AppCompatActivity {
     private void configureLoginToggleBtn() {
         mSwitchToLogin.setOnClickListener(v -> {
             startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-            overridePendingTransition(0, 0);
             finish();
         });
     }
 
     private void configureCloseBtn() {
-        mClose.setOnClickListener(v -> {
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            overridePendingTransition(0, 0);
-            finish();
-        });
+        mClose.setOnClickListener(v -> changeActivities());
     }
 
     private void createUser(String email, String password) {
@@ -86,15 +81,19 @@ public class RegisterActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 Toast.makeText(RegisterActivity.this, "User Created",
                         Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                overridePendingTransition(0, 0);
-                finish();
-
+                changeActivities();
             } else {
                 Toast.makeText(RegisterActivity.this, "Error! " +
                                 Objects.requireNonNull(task.getException()).getMessage(),
                         Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void changeActivities(){
+        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+        intent.putExtra("OpenProfileFragment", true);
+        startActivity(intent);
+        finish();
     }
 }

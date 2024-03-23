@@ -34,24 +34,24 @@ public class LoginRegisterFragment extends Fragment {
 
     public void configureRegisterBtn() {
         mRegister.setOnClickListener(v -> {
-            if (getActivity() != null) {
-                Intent intent = new Intent(getActivity(), RegisterActivity.class);
-                getActivity().overridePendingTransition(0, 0);
-                startActivity(intent);
-
-                getActivity().finish();
+            if (getActivity() == null) {
+                return;
             }
+            Intent intent = new Intent(getActivity(), RegisterActivity.class);
+            startActivity(intent);
+
+            getActivity().finish();
         });
     }
 
     public void configureLoginBtn() {
         mLogin.setOnClickListener(v -> {
-            if (getActivity() != null) {
-                Intent intent = new Intent(getActivity(), LoginActivity.class);
-                startActivity(intent);
-                getActivity().overridePendingTransition(0, 0);
-                getActivity().finish();
+            if (getActivity() == null) {
+                return;
             }
+            Intent intent = new Intent(getActivity(), LoginActivity.class);
+            startActivity(intent);
+            getActivity().finish();
         });
     }
 }

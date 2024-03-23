@@ -12,7 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.timetwist.MainActivity;
+import com.timetwist.bottombar.MainActivity;
 import com.timetwist.R;
 
 import java.util.Objects;
@@ -67,19 +67,12 @@ public class LoginActivity extends AppCompatActivity {
     private void configureLoginToggleBtn() {
         mSwitchToReg.setOnClickListener(v -> {
             startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
-            overridePendingTransition(0, 0);
             finish();
         });
     }
 
     private void configureCloseBtn() {
-        mClose.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            intent.putExtra("OpenProfileFragment", true); // Extra to indicate opening the profile fragment
-            startActivity(intent);
-            overridePendingTransition(0, 0);
-            finish();
-        });
+        mClose.setOnClickListener(v -> changeActivities());
     }
 
 
@@ -88,13 +81,18 @@ public class LoginActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 Toast.makeText(LoginActivity.this, "Logged in Successfully",
                         Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                overridePendingTransition(0, 0);
-                finish();
+                changeActivities();
             } else {
                 Toast.makeText(LoginActivity.this, "Error!" +
                         Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void changeActivities(){
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        intent.putExtra("OpenProfileFragment", true);
+        startActivity(intent);
+        finish();
     }
 }

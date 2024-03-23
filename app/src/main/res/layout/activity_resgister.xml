@@ -94,5 +94,6 @@
         android:background="@drawable/s_sing_up_in_btn"
         android:text="Register"
         android:textAllCaps="false"
+        android:textColor="@color/white"
         android:textSize="30sp" />
 </LinearLayout>

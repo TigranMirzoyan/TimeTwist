@@ -63,8 +63,6 @@ public class MapFragment extends Fragment {
 
         configureAutocomplete();
         configureFusedLocationClient();
-
-
     }
 
     private void onMapReady(GoogleMap map) {
@@ -97,7 +95,6 @@ public class MapFragment extends Fragment {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, LAT_LNG_ZOOM));
                 }
             }
-
             @Override
             public void onError(@NonNull Status status) {
             }
