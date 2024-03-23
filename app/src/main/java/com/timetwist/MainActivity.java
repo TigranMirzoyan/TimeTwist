@@ -1,4 +1,4 @@
-package com.timetwist.bottombar;
+package com.timetwist;
 
 import android.os.Bundle;
 
@@ -9,8 +9,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.timetwist.R;
 import com.timetwist.account.LoginRegisterFragment;
+import com.timetwist.bottombar.HomeFragment;
+import com.timetwist.bottombar.MapFragment;
+import com.timetwist.bottombar.ProfileFragment;
 
 import nl.joery.animatedbottombar.AnimatedBottomBar;
 

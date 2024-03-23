@@ -12,7 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.timetwist.bottombar.MainActivity;
+import com.timetwist.MainActivity;
 import com.timetwist.R;
 
 import java.util.Objects;
