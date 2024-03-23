@@ -18,7 +18,7 @@ import com.timetwist.R;
 import java.util.Objects;
 
 public class RegisterActivity extends AppCompatActivity {
-    private EditText  mEmail, mPassword;
+    private EditText mEmail, mPassword;
     private Button mRegister;
     private TextView mSwitchToLogin;
     private ImageView mClose;
@@ -79,9 +79,23 @@ public class RegisterActivity extends AppCompatActivity {
     private void createUser(String email, String password) {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                Toast.makeText(RegisterActivity.this, "User Created",
-                        Toast.LENGTH_SHORT).show();
-                changeActivities();
+
+                Objects.requireNonNull(mAuth.getCurrentUser()).sendEmailVerification().addOnCompleteListener(task1 -> {
+                    if (!task.isSuccessful()) {
+                        Toast.makeText(RegisterActivity.this, "Error! " +
+                                        Objects.requireNonNull(task.getException()).getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    Toast.makeText(RegisterActivity.this, "User registered successfully." +
+                                    " Please verify your Email",
+                            Toast.LENGTH_SHORT).show();
+                    mEmail.setText("");
+                    mPassword.setText("");
+
+                    mAuth.signOut();
+                });
             } else {
                 Toast.makeText(RegisterActivity.this, "Error! " +
                                 Objects.requireNonNull(task.getException()).getMessage(),
@@ -90,7 +104,7 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private void changeActivities(){
+    private void changeActivities() {
         Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
         intent.putExtra("OpenProfileFragment", true);
         startActivity(intent);

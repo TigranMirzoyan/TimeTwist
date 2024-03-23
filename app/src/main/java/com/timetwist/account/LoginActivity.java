@@ -79,6 +79,15 @@ public class LoginActivity extends AppCompatActivity {
     private void createUser(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+                if (!Objects.requireNonNull(mAuth.getCurrentUser()).isEmailVerified()) {
+                    mEmail.setText("");
+                    mPassword.setText("");
+                    mAuth.signOut();
+                    Toast.makeText(LoginActivity.this, "Email isn't verified",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Toast.makeText(LoginActivity.this, "Logged in Successfully",
                         Toast.LENGTH_SHORT).show();
                 changeActivities();
@@ -89,7 +98,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void changeActivities(){
+    private void changeActivities() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         intent.putExtra("OpenProfileFragment", true);
         startActivity(intent);
