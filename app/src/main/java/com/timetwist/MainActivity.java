@@ -29,11 +29,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        bottomBar = findViewById(R.id.bottom_bar);
+        bottomBar = findViewById(R.id.bottomBar);
         mAuth = FirebaseAuth.getInstance();
 
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.framelayout, mapFragment)
+                .add(R.id.frameLayout, mapFragment)
                 .hide(mapFragment)
                 .commit();
 
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         if (!fragment.isAdded()) {
-            transaction.add(R.id.framelayout, fragment);
+            transaction.add(R.id.frameLayout, fragment);
         }
 
         transaction.show(fragment);

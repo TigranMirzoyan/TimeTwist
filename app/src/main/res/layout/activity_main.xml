@@ -7,28 +7,27 @@
     tools:context=".MainActivity">
 
     <FrameLayout
-        android:id="@+id/framelayout"
+        android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottom_bar"
-        android:background="@color/light_grayish_cyan" />
+        android:layout_above="@id/bottomBar"/>
 
     <nl.joery.animatedbottombar.AnimatedBottomBar
-        android:id="@+id/bottom_bar"
+        android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@color/dark_cyan"
+        android:background="@color/blue"
+        app:abb_animationDuration="600"
+        app:abb_animationInterpolator="@android:anim/overshoot_interpolator"
         app:abb_indicatorAppearance="round"
-        app:abb_indicatorColor="@color/turquoise"
+        app:abb_indicatorColor="@color/capri"
         app:abb_indicatorHeight="4dp"
         app:abb_indicatorMargin="16dp"
         app:abb_selectedIndex="0"
         app:abb_selectedTabType="text"
-        app:abb_tabColor="@color/platinum"
-        app:abb_tabColorSelected="@color/powder_blue"
-        app:abb_tabs="@menu/bottom_navigation_menu"
-        app:abb_animationInterpolator="@android:anim/overshoot_interpolator"
-        app:abb_animationDuration="600"/>
+        app:abb_tabColor="@color/white"
+        app:abb_tabColorSelected="@color/capri"
+        app:abb_tabs="@menu/bottom_navigation_menu" />
 
 </RelativeLayout>

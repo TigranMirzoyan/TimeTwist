@@ -18,6 +18,7 @@ import com.timetwist.R;
 
 public class ProfileFragment extends Fragment {
     private Button mLogOut;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -38,8 +39,8 @@ public class ProfileFragment extends Fragment {
 
     }
 
-    public void configureLogOutButton(){
-        mLogOut.setOnClickListener(v ->{
+    public void configureLogOutButton() {
+        mLogOut.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
             if (getActivity() instanceof MainActivity) {
                 MainActivity mainActivity = (MainActivity) getActivity();
