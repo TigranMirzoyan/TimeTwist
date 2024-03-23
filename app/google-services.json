@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "357456969230",
+    "project_id": "timetwistapp777",
+    "storage_bucket": "timetwistapp777.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:357456969230:android:5b5243e60178aa147bc65f",
+        "android_client_info": {
+          "package_name": "com.timetwist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9RnhK1U2NsbUr7pHJ5fYs1APDYM5ZYAo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

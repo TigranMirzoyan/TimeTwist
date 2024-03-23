@@ -21,6 +21,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/my_map_Api_key" />
 
+        <activity android:name=".account.RegisterActivity" />
+        <activity android:name=".account.LoginActivity" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

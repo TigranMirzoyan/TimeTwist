@@ -1,4 +1,4 @@
-package com.timetwist;
+package com.timetwist.bottombar;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -30,6 +30,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.timetwist.R;
 
 import java.util.Arrays;
 
