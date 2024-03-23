@@ -1,7 +1,11 @@
 package com.timetwist.bottombar;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,17 +27,17 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.timetwist.R;
 
 import java.util.Arrays;
@@ -44,7 +48,6 @@ public class MapFragment extends Fragment {
     public static final int COMPASS_ID = 1;
     public static final int LOCATION_COMPASS_ID = 5;
     public static final int LAT_LNG_ZOOM = 15;
-    private View compass;
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
     private Button mMyLocationButton;
@@ -59,7 +62,6 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mMyLocationButton = view.findViewById(R.id.myLocationBtn);
-        compass = getView().findViewById(COMPASS_ID);
 
         configureAutocomplete();
         configureFusedLocationClient();
@@ -73,7 +75,6 @@ public class MapFragment extends Fragment {
         configureMyLocationButton();
         configureMap();
         updateLocation(() -> Toast.makeText(requireContext(), "Location unavailable", Toast.LENGTH_SHORT).show());
-        fetchLocationsAndAddMarkers();
     }
 
     private void configureFusedLocationClient() {
@@ -95,6 +96,7 @@ public class MapFragment extends Fragment {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, LAT_LNG_ZOOM));
                 }
             }
+
             @Override
             public void onError(@NonNull Status status) {
             }
@@ -116,6 +118,8 @@ public class MapFragment extends Fragment {
 
     private void configureUi() {
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        View compass = requireView().findViewById(COMPASS_ID);
+
         if (compass == null) {
             return;
         }
@@ -140,6 +144,7 @@ public class MapFragment extends Fragment {
             mIsAtCurrentLocation = false;
             updateMyLocationButtonDrawable();
         });
+        addMarkersFromFirebase();
     }
 
     private void moveToCurrentLocation() {
@@ -150,8 +155,8 @@ public class MapFragment extends Fragment {
     }
 
     private void updateLocation(Runnable ifLocationIsNull) {
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(),
+        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireActivity(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             return;
@@ -177,26 +182,34 @@ public class MapFragment extends Fragment {
     }
 
 
-    private void fetchLocationsAndAddMarkers() {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("locations");
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Double lat = snapshot.child("latitude").getValue(Double.class);
-                    Double lng = snapshot.child("longitude").getValue(Double.class);
+    private void addMarkersFromFirebase() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("Location").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    document.getData().values().forEach(obj ->{
+                        GeoPoint geoPoint = (GeoPoint) obj;
 
-                    if (lat != null && lng != null) {
-                        LatLng position = new LatLng(lat, lng);
-                        mMap.addMarker(new MarkerOptions().position(position));
-                    }
+                        LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
+                        mMap.addMarker(new MarkerOptions()
+                                .position(latLng)
+                                .icon(getBitmapDescriptorFromVectorDrawable(getContext(), R.drawable.m_church_marker)));
+                    });
                 }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.w("MapFragment", "loadPost:onCancelled", databaseError.toException());
+            } else {
+                Log.w("MapFragment", "Error getting documents.", task.getException());
             }
         });
+    }
+
+    private static BitmapDescriptor getBitmapDescriptorFromVectorDrawable(Context context, int drawableId) {
+        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+        assert drawable != null;
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 }
