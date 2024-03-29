@@ -39,6 +39,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.timetwist.R;
+import com.timetwist.info.PlaceInfoDialog;
+import com.timetwist.info.WikipediaAPI;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -181,26 +183,32 @@ public class MapFragment extends Fragment {
                 mIsAtCurrentLocation ? R.drawable.my_location_visible : R.drawable.my_location_not_visible));
     }
 
-
     private void addMarkersFromFirebase() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("Location").get().addOnCompleteListener(task -> {
+        db.collection("Locations").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    document.getData().values().forEach(obj ->{
-                        GeoPoint geoPoint = (GeoPoint) obj;
+                    String name = document.getString("name");
 
+                    GeoPoint geoPoint = document.getGeoPoint("coordinates");
+                    if (geoPoint != null && name != null) {
                         LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
                         mMap.addMarker(new MarkerOptions()
                                 .position(latLng)
-                                .icon(getBitmapDescriptorFromVectorDrawable(getContext(), R.drawable.m_church_marker)));
-                    });
+                                .title(name)
+                                .icon(getBitmapDescriptorFromVectorDrawable(getContext(), R.drawable.m_tree)));
+                    } else {
+                        Log.w("MapFragment", "Document data is incomplete: " + document.getId());
+                    }
                 }
             } else {
                 Log.w("MapFragment", "Error getting documents.", task.getException());
             }
         });
+
+        configureMarkers();
     }
+
 
     private static BitmapDescriptor getBitmapDescriptorFromVectorDrawable(Context context, int drawableId) {
         Drawable drawable = ContextCompat.getDrawable(context, drawableId);
@@ -211,5 +219,16 @@ public class MapFragment extends Fragment {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    private void configureMarkers(){
+        mMap.setOnMarkerClickListener(marker -> {
+            String title = marker.getTitle();
+
+            PlaceInfoDialog dialogFragment = new PlaceInfoDialog(title, WikipediaAPI.fetchArticle(title));
+            dialogFragment.show(getChildFragmentManager(), "PlaceInfoDialog");
+
+            return false;
+        });
     }
 }

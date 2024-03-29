@@ -49,31 +49,46 @@
 
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/email"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/s_edittext_background"
-        android:ems="10"
-        android:hint="Email address"
-        android:inputType="textEmailAddress"
         android:paddingHorizontal="20dp"
-        android:textColorHint="@color/dark_blue" />
+        android:textColorHint="@color/dark_blue">
 
-    <EditText
-        android:id="@+id/password"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Email address"
+            android:inputType="textEmailAddress"
+            android:textColorHint="@color/dark_blue" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/s_edittext_background"
-        android:ems="10"
-        android:hint="Password"
-        android:inputType="textPassword"
         android:paddingHorizontal="20dp"
-        android:textColorHint="@color/dark_blue" />
+        android:textColorHint="@color/dark_blue"
+        app:passwordToggleEnabled="true">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Password"
+            android:inputType="textPassword"
+            app:endIconMode="password_toggle" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:id="@+id/switchToLogin"

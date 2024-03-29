@@ -37,4 +37,5 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(libs.bottom.bar)
+    implementation(libs.gson)
 }

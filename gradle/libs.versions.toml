@@ -11,10 +11,12 @@ firebaseAuth = "22.3.1"
 viewmodelKtx = "2.7.0"
 playServicesMaps = "18.2.0"
 playServicesLocation = "21.2.0"
-places = "3.3.0"
-firebaseFirestore = "24.10.3"
+places = "3.4.0"
+firebaseFirestore = "24.11.0"
 firebaseDatabase = "20.3.1"
+firebaseStorage = "20.3.0"
 bottomBar = "1.1.0"
+gson = "2.10.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -25,18 +27,19 @@ material = { group = "com.google.android.material", name = "material", version.r
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "viewmodelKtx" }
-play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
+firebase-storage = {group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 bottom-bar = { module = "nl.joery.animatedbottombar:library", version.ref = "bottomBar" }
+gson = {module = "com.google.code.gson:gson", version.ref = "gson"}
 
 [bundles]
 androidx = ["appcompat", "material", "activity", "constraintlayout", "viewmodel-ktx"]
-firebase = ["firebase-auth", "firebase-firestore", "firebase-database"]
-google = ["play-services-maps", "play-services-location", "places"]
+firebase = ["firebase-auth", "firebase-firestore", "firebase-database", "firebase-storage"]
+google = [ "play-services-location", "places"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
