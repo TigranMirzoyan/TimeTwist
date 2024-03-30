@@ -18,7 +18,6 @@ import com.timetwist.R;
 
 public class ProfileFragment extends Fragment {
     private Button mLogOut;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -45,6 +44,8 @@ public class ProfileFragment extends Fragment {
             if (getActivity() instanceof MainActivity) {
                 MainActivity mainActivity = (MainActivity) getActivity();
                 mainActivity.replace(mainActivity.loginRegisterFragment);
+                mainActivity.getMapFragment().getMap().clear();
+                mainActivity.getMapFragment().addMarkersFromFirebase();
             }
         });
     }

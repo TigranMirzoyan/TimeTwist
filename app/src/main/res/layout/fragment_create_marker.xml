@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="380dp"
+        android:layout_centerVertical="true"
+        android:layout_marginHorizontal="10dp"
+        android:background="@drawable/info_background">
+
+        <LinearLayout
+            android:id="@+id/linearL"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <EditText
+                android:id="@+id/placeName"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/s_edittext_background"
+                android:hint="Name"
+                android:paddingStart="10dp"
+                android:text=""
+                android:textColor="@color/black"
+                android:textColorHint="@color/dark_blue"
+                android:textSize="30sp" />
+
+            <EditText
+                android:id="@+id/placeDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/placeName"
+                android:layout_marginTop="32dp"
+                android:background="@drawable/info_background"
+                android:gravity="top|start"
+                android:hint="Description"
+                android:inputType="textMultiLine"
+                android:minLines="6"
+                android:overScrollMode="ifContentScrolls"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="20dp"
+                android:scrollbars="vertical" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/close"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_below="@id/linearL"
+            android:layout_marginStart="20dp"
+            android:background="@drawable/s_sing_up_in_btn"
+            android:text="Close"
+            android:textAllCaps="false"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_below="@id/linearL"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/s_sing_up_in_btn"
+            android:text="Save"
+            android:textAllCaps="false"
+            android:textSize="20sp" />
+    </RelativeLayout>
+</RelativeLayout>
+

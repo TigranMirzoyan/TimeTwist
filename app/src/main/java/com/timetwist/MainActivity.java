@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
     private final Fragment homeFragment = new HomeFragment();
     private final Fragment profileFragment = new ProfileFragment();
     public final Fragment loginRegisterFragment = new LoginRegisterFragment();
-    private final Fragment mapFragment = new MapFragment();
+    private final MapFragment mapFragment = new MapFragment();
     private Fragment currentFragment = homeFragment;
     private FirebaseAuth mAuth;
 
@@ -106,5 +106,9 @@ public class MainActivity extends AppCompatActivity {
             selectedFragment = profileFragment;
         }
         replace(selectedFragment);
+    }
+
+    public MapFragment getMapFragment() {
+        return mapFragment;
     }
 }

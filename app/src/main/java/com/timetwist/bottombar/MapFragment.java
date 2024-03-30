@@ -30,20 +30,26 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.timetwist.R;
+import com.timetwist.info.CreateMarker;
 import com.timetwist.info.PlaceInfoDialog;
 import com.timetwist.info.WikipediaAPI;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 
 public class MapFragment extends Fragment {
@@ -52,8 +58,10 @@ public class MapFragment extends Fragment {
     public static final int LAT_LNG_ZOOM = 15;
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
-    private Button mMyLocationButton;
+    private Button mMyLocationButton, mAddMarkerButton;
     private boolean mIsAtCurrentLocation;
+    private final Set<Marker> mFirebaseMarkers = new HashSet<>();
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -64,6 +72,7 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mMyLocationButton = view.findViewById(R.id.myLocationBtn);
+        mAddMarkerButton = view.findViewById(R.id.addMarker);
 
         configureAutocomplete();
         configureFusedLocationClient();
@@ -146,6 +155,7 @@ public class MapFragment extends Fragment {
             mIsAtCurrentLocation = false;
             updateMyLocationButtonDrawable();
         });
+        mAddMarkerButton.setOnClickListener(v -> mMap.setOnMapClickListener(this::addMarkerOnMapClick));
         addMarkersFromFirebase();
     }
 
@@ -183,20 +193,26 @@ public class MapFragment extends Fragment {
                 mIsAtCurrentLocation ? R.drawable.my_location_visible : R.drawable.my_location_not_visible));
     }
 
-    private void addMarkersFromFirebase() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+    public void addMarkersFromFirebase() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
         db.collection("Locations").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     String name = document.getString("name");
+                    String type = document.getString("type");
 
                     GeoPoint geoPoint = document.getGeoPoint("coordinates");
-                    if (geoPoint != null && name != null) {
+                    if (geoPoint != null && name != null && type != null) {
                         LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
-                        mMap.addMarker(new MarkerOptions()
-                                .position(latLng)
-                                .title(name)
-                                .icon(getBitmapDescriptorFromVectorDrawable(getContext(), R.drawable.m_tree)));
+                        try {
+                            mFirebaseMarkers.add(mMap.addMarker(new MarkerOptions()
+                                    .position(latLng)
+                                    .title(name)
+                                    .icon(getBitmapDescriptorFromVectorDrawable(getContext(), R.drawable.class.getField(type).getInt(null)))));
+                        } catch (IllegalAccessException | NoSuchFieldException e) {
+                            throw new RuntimeException(e);
+                        }
                     } else {
                         Log.w("MapFragment", "Document data is incomplete: " + document.getId());
                     }
@@ -204,11 +220,34 @@ public class MapFragment extends Fragment {
             } else {
                 Log.w("MapFragment", "Error getting documents.", task.getException());
             }
+            configureMarkers();
         });
 
-        configureMarkers();
-    }
+        if (currentUser != null) {
+            String uid = currentUser.getUid();
+            db.collection("Users").document(uid).collection("Markers")
+                    .get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String name = document.getString("name");
+                                String description = document.getString("description");
+                                GeoPoint geoPoint = document.getGeoPoint("coordinates");
 
+                                if (geoPoint != null && name != null) {
+                                    LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
+                                    mMap.addMarker(new MarkerOptions()
+                                            .position(latLng)
+                                            .title(name)
+                                            .snippet(description));
+                                }
+                            }
+                        } else {
+                            Log.w("MapFragment", "Error getting documents.", task.getException());
+                        }
+                    });
+            configureMarkers();
+        }
+    }
 
     private static BitmapDescriptor getBitmapDescriptorFromVectorDrawable(Context context, int drawableId) {
         Drawable drawable = ContextCompat.getDrawable(context, drawableId);
@@ -221,14 +260,30 @@ public class MapFragment extends Fragment {
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
-    private void configureMarkers(){
+    private void configureMarkers() {
         mMap.setOnMarkerClickListener(marker -> {
             String title = marker.getTitle();
-
-            PlaceInfoDialog dialogFragment = new PlaceInfoDialog(title, WikipediaAPI.fetchArticle(title));
+            PlaceInfoDialog dialogFragment = new PlaceInfoDialog(title, getDescription(marker));
             dialogFragment.show(getChildFragmentManager(), "PlaceInfoDialog");
 
             return false;
         });
+    }
+
+    private void addMarkerOnMapClick(LatLng latLng) {
+        CreateMarker createMarkerDialog = new CreateMarker(latLng, this);
+        createMarkerDialog.show(getChildFragmentManager(), "CreateMarkerDialog");
+        mMap.setOnMapClickListener(null);
+    }
+
+    private String getDescription(Marker marker) {
+        if (mFirebaseMarkers.contains(marker)) {
+            return WikipediaAPI.fetchArticle(marker.getTitle());
+        }
+        return marker.getSnippet();
+    }
+
+    public GoogleMap getMap() {
+        return mMap;
     }
 }

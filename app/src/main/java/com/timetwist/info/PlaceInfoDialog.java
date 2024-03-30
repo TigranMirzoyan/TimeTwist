@@ -58,5 +58,4 @@ public class PlaceInfoDialog extends DialogFragment {
 
         return dialog;
     }
-
 }

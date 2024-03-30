@@ -9,7 +9,6 @@ activity = "1.8.2"
 constraintlayout = "2.1.4"
 firebaseAuth = "22.3.1"
 viewmodelKtx = "2.7.0"
-playServicesMaps = "18.2.0"
 playServicesLocation = "21.2.0"
 places = "3.4.0"
 firebaseFirestore = "24.11.0"
@@ -33,6 +32,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 firebase-storage = {group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
+
 bottom-bar = { module = "nl.joery.animatedbottombar:library", version.ref = "bottomBar" }
 gson = {module = "com.google.code.gson:gson", version.ref = "gson"}
 

@@ -12,9 +12,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.timetwist.MainActivity;
 import com.timetwist.R;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
@@ -79,24 +83,41 @@ public class LoginActivity extends AppCompatActivity {
     private void createUser(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                if (!Objects.requireNonNull(mAuth.getCurrentUser()).isEmailVerified()) {
-                    mEmail.setText("");
-                    mPassword.setText("");
-                    mAuth.signOut();
-                    Toast.makeText(LoginActivity.this, "Email isn't verified",
-                            Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                FirebaseUser currentUser = mAuth.getCurrentUser();
 
-                Toast.makeText(LoginActivity.this, "Logged in Successfully",
-                        Toast.LENGTH_SHORT).show();
-                changeActivities();
+                if (currentUser != null) {
+                    if (!currentUser.isEmailVerified()) {
+                        mEmail.setText("");
+                        mPassword.setText("");
+                        mAuth.signOut();
+                        Toast.makeText(LoginActivity.this, "Email isn't verified", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Map<String, Object> user = new HashMap<>();
+                        user.put("email", email);
+                        user.put("uid", currentUser.getUid());
+
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        db.collection("Users").document(currentUser.getUid())
+                                .set(user)
+                                .addOnSuccessListener(aVoid -> Toast.makeText(LoginActivity.this,
+                                        "User added to FireStore", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(e -> Toast.makeText(LoginActivity.this,
+                                        "Error adding user to FireStore", Toast.LENGTH_SHORT).show());
+
+                        Toast.makeText(LoginActivity.this, "Logged in Successfully",
+                                Toast.LENGTH_SHORT).show();
+                        changeActivities();
+                    }
+                } else {
+                    Toast.makeText(LoginActivity.this, "Error obtaining user information",
+                            Toast.LENGTH_SHORT).show();
+                }
             } else {
-                Toast.makeText(LoginActivity.this, "Error!" +
-                        Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "Login failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
     private void changeActivities() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);

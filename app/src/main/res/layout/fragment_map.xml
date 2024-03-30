@@ -38,10 +38,14 @@
             android:id="@+id/myLocationBtn"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
             android:background="@drawable/my_location_not_visible" />
 
-    </LinearLayout>
+        <Button
+            android:id="@+id/addMarker"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/add_button" />
 
+    </LinearLayout>
 </RelativeLayout>
