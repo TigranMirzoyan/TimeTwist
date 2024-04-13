@@ -44,12 +44,11 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.timetwist.R;
 import com.timetwist.info.CreateMarker;
 import com.timetwist.info.PlaceInfoDialog;
+import com.timetwist.info.PlaceInfoDialog2;
 import com.timetwist.info.WikipediaAPI;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 
 public class MapFragment extends Fragment {
@@ -60,7 +59,6 @@ public class MapFragment extends Fragment {
     private FusedLocationProviderClient mFusedLocationClient;
     private Button mMyLocationButton, mAddMarkerButton;
     private boolean mIsAtCurrentLocation;
-    private final Set<Marker> mFirebaseMarkers = new HashSet<>();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
@@ -201,15 +199,15 @@ public class MapFragment extends Fragment {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     String name = document.getString("name");
                     String type = document.getString("type");
-
                     GeoPoint geoPoint = document.getGeoPoint("coordinates");
                     if (geoPoint != null && name != null && type != null) {
                         LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
                         try {
-                            mFirebaseMarkers.add(mMap.addMarker(new MarkerOptions()
+                            Marker marker = mMap.addMarker(new MarkerOptions()
                                     .position(latLng)
                                     .title(name)
-                                    .icon(getBitmapDescriptorFromVectorDrawable(getContext(), R.drawable.class.getField(type).getInt(null)))));
+                                    .icon(getBitmapDescriptorFromVectorDrawable(getContext(), R.drawable.class.getField(type).getInt(null))));
+                            marker.setTag("firebase");  // Tagging the marker as from Firebase
                         } catch (IllegalAccessException | NoSuchFieldException e) {
                             throw new RuntimeException(e);
                         }
@@ -232,13 +230,13 @@ public class MapFragment extends Fragment {
                                 String name = document.getString("name");
                                 String description = document.getString("description");
                                 GeoPoint geoPoint = document.getGeoPoint("coordinates");
-
                                 if (geoPoint != null && name != null) {
                                     LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
-                                    mMap.addMarker(new MarkerOptions()
+                                    Marker marker = mMap.addMarker(new MarkerOptions()
                                             .position(latLng)
                                             .title(name)
                                             .snippet(description));
+                                    marker.setTag(document.getId());
                                 }
                             }
                         } else {
@@ -249,8 +247,8 @@ public class MapFragment extends Fragment {
             Toast.makeText(requireActivity(), "No authenticated user found.", Toast.LENGTH_SHORT).show();
         }
         configureMarkers();
-
     }
+
 
     private static BitmapDescriptor getBitmapDescriptorFromVectorDrawable(Context context, int drawableId) {
         Drawable drawable = ContextCompat.getDrawable(context, drawableId);
@@ -266,27 +264,26 @@ public class MapFragment extends Fragment {
     private void configureMarkers() {
         mMap.setOnMarkerClickListener(marker -> {
             String title = marker.getTitle();
-            PlaceInfoDialog dialogFragment = new PlaceInfoDialog(title, getDescription(marker));
-            dialogFragment.show(getChildFragmentManager(), "PlaceInfoDialog");
-
+            String markerType = (String) marker.getTag();
+            if ("firebase".equals(markerType)) {
+                PlaceInfoDialog dialogFragment = new PlaceInfoDialog(title, WikipediaAPI.fetchArticle(marker.getTitle()));
+                dialogFragment.show(getChildFragmentManager(), "PlaceInfoDialog");
+            } else {
+                PlaceInfoDialog2 dialogFragment = new PlaceInfoDialog2(title, marker.getSnippet(), this, (String) marker.getTag());
+                dialogFragment.show(getChildFragmentManager(), "PlaceInfoDialog2");
+            }
             return false;
         });
     }
 
     private void addMarkerOnMapClick(LatLng latLng) {
         CreateMarker createMarkerDialog = new CreateMarker(latLng, this);
-        createMarkerDialog.show(getChildFragmentManager(), "CreateMarkerDialog");
+        createMarkerDialog.show(getChildFragmentManager(), "firebase");
         mMap.setOnMapClickListener(null);
-    }
-
-    private String getDescription(Marker marker) {
-        if (mFirebaseMarkers.contains(marker)) {
-            return WikipediaAPI.fetchArticle(marker.getTitle());
-        }
-        return marker.getSnippet();
     }
 
     public GoogleMap getMap() {
         return mMap;
     }
+
 }
