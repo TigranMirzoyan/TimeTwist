@@ -224,8 +224,8 @@ public class MapFragment extends Fragment {
         });
 
         if (currentUser != null) {
-            String uid = currentUser.getUid();
-            db.collection("Users").document(uid).collection("Markers")
+            String userId = currentUser.getUid();
+            db.collection("Users").document(userId).collection("Markers")
                     .get().addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
@@ -245,8 +245,11 @@ public class MapFragment extends Fragment {
                             Log.w("MapFragment", "Error getting documents.", task.getException());
                         }
                     });
-            configureMarkers();
+        } else {
+            Toast.makeText(requireActivity(), "No authenticated user found.", Toast.LENGTH_SHORT).show();
         }
+        configureMarkers();
+
     }
 
     private static BitmapDescriptor getBitmapDescriptorFromVectorDrawable(Context context, int drawableId) {

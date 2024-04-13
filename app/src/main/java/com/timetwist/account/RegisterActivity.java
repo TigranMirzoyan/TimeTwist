@@ -12,27 +12,35 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.timetwist.MainActivity;
 import com.timetwist.R;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class RegisterActivity extends AppCompatActivity {
-    private EditText mEmail, mPassword;
+    private EditText mUsername, mEmail, mPassword;
     private Button mRegister;
     private TextView mSwitchToLogin;
     private ImageView mClose;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resgister);
+        mUsername = findViewById(R.id.username);
         mEmail = findViewById(R.id.email);
         mPassword = findViewById(R.id.password);
         mSwitchToLogin = findViewById(R.id.switchToLogin);
         mRegister = findViewById(R.id.registerBtn);
         mClose = findViewById(R.id.closeActivity);
+        db = FirebaseFirestore.getInstance();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -43,8 +51,13 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void configureRegisterBtn() {
         mRegister.setOnClickListener(v -> {
+            String username = mUsername.getText().toString().trim();
             String email = mEmail.getText().toString().trim();
             String password = mPassword.getText().toString().trim();
+
+            if (username.length() < 4) {
+                mUsername.setError("Name should be at  4 letters");
+            }
 
             if (TextUtils.isEmpty(email)) {
                 mEmail.setError("Email is Required");
@@ -61,7 +74,7 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            createUser(email, password);
+            createUser(username, email, password);
         });
     }
 
@@ -72,15 +85,23 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    private void changeActivities() {
+        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+        intent.putExtra("OpenProfileFragment", true);
+        startActivity(intent);
+        finish();
+    }
+
     private void configureCloseBtn() {
         mClose.setOnClickListener(v -> changeActivities());
     }
 
-    private void createUser(String email, String password) {
+
+    private void createUser(String username, String email, String password) {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-
-                Objects.requireNonNull(mAuth.getCurrentUser()).sendEmailVerification().addOnCompleteListener(task1 -> {
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                Objects.requireNonNull(currentUser).sendEmailVerification().addOnCompleteListener(task1 -> {
                     if (!task.isSuccessful()) {
                         Toast.makeText(RegisterActivity.this, "Error! " +
                                         Objects.requireNonNull(task.getException()).getMessage(),
@@ -94,20 +115,29 @@ public class RegisterActivity extends AppCompatActivity {
                     mEmail.setText("");
                     mPassword.setText("");
 
-                    mAuth.signOut();
+                    createUserInDB(username, email, password, currentUser);
+                    changeActivities();
                 });
             } else {
-                Toast.makeText(RegisterActivity.this, "Error! " +
-                                Objects.requireNonNull(task.getException()).getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterActivity.this, "The email address is already in use by another account.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void changeActivities() {
-        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-        intent.putExtra("OpenProfileFragment", true);
-        startActivity(intent);
-        finish();
+
+    private void createUserInDB(final String username, final String email, final String password, FirebaseUser currentUser) {
+        String userId = currentUser.getUid();
+        Map<String, Object> user = new HashMap<>();
+        user.put("username", username);
+        user.put("email", email);
+        user.put("password", password);
+
+        db.collection("Users").document(userId)
+                .set(user)
+                .addOnSuccessListener(aVoid -> {
+                    mUsername.setText("");
+                    mEmail.setText("");
+                    mPassword.setText("");
+                });
     }
 }
