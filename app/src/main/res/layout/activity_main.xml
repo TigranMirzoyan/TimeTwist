@@ -17,17 +17,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@color/blue"
+        android:background="@color/marian_blue"
         app:abb_animationDuration="600"
         app:abb_animationInterpolator="@android:anim/overshoot_interpolator"
         app:abb_indicatorAppearance="round"
-        app:abb_indicatorColor="@color/capri"
+        app:abb_indicatorColor="@color/amaranth_purple"
         app:abb_indicatorHeight="4dp"
         app:abb_indicatorMargin="16dp"
         app:abb_selectedIndex="0"
         app:abb_selectedTabType="text"
         app:abb_tabColor="@color/white"
-        app:abb_tabColorSelected="@color/capri"
+        app:abb_tabColorSelected="@color/amaranth_purple"
         app:abb_tabs="@menu/bottom_navigation_menu" />
 
 </RelativeLayout>

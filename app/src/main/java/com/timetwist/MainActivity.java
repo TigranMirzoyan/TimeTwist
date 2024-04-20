@@ -37,6 +37,11 @@ public class MainActivity extends AppCompatActivity {
                 .hide(mapFragment)
                 .commit();
 
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.frameLayout, profileFragment, "ProfileFragment")
+                .hide(profileFragment)
+                .commit();
+
         replace(currentFragment);
         chooseFragment();
         setupBottomBarItemSelection();
@@ -52,10 +57,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (!fragment.isAdded()) {
             transaction.add(R.id.frameLayout, fragment);
-        } else {
-            transaction.show(fragment);
         }
 
+        transaction.show(fragment);
         transaction.commit();
         currentFragment = fragment;
     }

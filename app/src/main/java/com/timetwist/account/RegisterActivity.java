@@ -38,7 +38,7 @@ public class RegisterActivity extends AppCompatActivity {
         mEmail = findViewById(R.id.email);
         mPassword = findViewById(R.id.password);
         mSwitchToLogin = findViewById(R.id.switchToLogin);
-        mRegister = findViewById(R.id.registerBtn);
+        mRegister = findViewById(R.id.registerButton);
         mClose = findViewById(R.id.closeActivity);
         db = FirebaseFirestore.getInstance();
 
@@ -54,27 +54,31 @@ public class RegisterActivity extends AppCompatActivity {
             String username = mUsername.getText().toString().trim();
             String email = mEmail.getText().toString().trim();
             String password = mPassword.getText().toString().trim();
+            boolean check = true;
 
             if (username.length() < 4) {
                 mUsername.setError("Name should be at  4 letters");
+                check = false;
             }
 
             if (TextUtils.isEmpty(email)) {
                 mEmail.setError("Email is Required");
-                return;
+                check = false;
             }
 
             if (TextUtils.isEmpty(password)) {
                 mPassword.setError("Password is Required");
-                return;
+                check = false;
             }
 
             if (password.length() < 8) {
                 mPassword.setError("Password must be more than 7 letters");
-                return;
+                check = false;
             }
 
-            createUser(username, email, password);
+            if (check){
+                createUser(username, email, password);
+            }
         });
     }
 

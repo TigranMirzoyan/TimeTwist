@@ -31,41 +31,44 @@ public class LoginActivity extends AppCompatActivity {
 
         mEmail = findViewById(R.id.email);
         mPassword = findViewById(R.id.password);
-        mSwitchToReg = findViewById(R.id.switchToReg);
-        mLogin = findViewById(R.id.loginBtn);
+        mSwitchToReg = findViewById(R.id.switchToRegister);
+        mLogin = findViewById(R.id.loginButton);
         mClose = findViewById(R.id.closeActivity);
 
         mAuth = FirebaseAuth.getInstance();
 
-        configureLoginToggleBtn();
-        configureRegisterBtn();
+        configureRegisterToggleBtn();
+        configureLoginButton();
         configureCloseBtn();
     }
 
-    private void configureRegisterBtn() {
+    private void configureLoginButton() {
         mLogin.setOnClickListener(v -> {
             String email = mEmail.getText().toString().trim();
             String password = mPassword.getText().toString().trim();
+            boolean check = true;
 
             if (TextUtils.isEmpty(email)) {
                 mEmail.setError("Email is Required");
-                return;
+                check = false;
             }
 
             if (TextUtils.isEmpty(password)) {
                 mPassword.setError("Password is Required");
-                return;
+                check = false;
             } else if (password.length() < 8) {
                 mPassword.setError("Password must be more than 7 letters");
-                return;
+                check = false;
             }
 
-            loginUser(email, password);
+            if (check) {
+                loginUser(email, password);
+            }
         });
     }
 
 
-    private void configureLoginToggleBtn() {
+    private void configureRegisterToggleBtn() {
         mSwitchToReg.setOnClickListener(v -> {
             startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
             finish();

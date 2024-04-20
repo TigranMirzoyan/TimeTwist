@@ -52,12 +52,14 @@ import java.util.Objects;
 
 
 public class MapFragment extends Fragment {
-    public static final int COMPASS_ID = 1;
-    public static final int LOCATION_COMPASS_ID = 5;
-    public static final int LAT_LNG_ZOOM = 15;
+    private static final int COMPASS_ID = 1;
+    private static final int LOCATION_COMPASS_ID = 5;
+    private static final int LAT_LNG_ZOOM = 15;
+
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
-    private Button mMyLocationButton, mAddMarkerButton;
+    private Button mMyLocationButton;
+    private Button mAddMarkerButton;
     private boolean mIsAtCurrentLocation;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -72,7 +74,6 @@ public class MapFragment extends Fragment {
         mMyLocationButton = view.findViewById(R.id.myLocationBtn);
         mAddMarkerButton = view.findViewById(R.id.addMarker);
 
-        configureAutocomplete();
         configureFusedLocationClient();
     }
 
@@ -82,6 +83,7 @@ public class MapFragment extends Fragment {
         tryEnablingMyLocation();
         configureUi();
         configureMyLocationButton();
+        configureAutocomplete();
         configureMap();
         updateLocation(() -> Toast.makeText(requireContext(), "Location unavailable", Toast.LENGTH_SHORT).show());
     }
