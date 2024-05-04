@@ -38,4 +38,5 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation(libs.bottom.bar)
     implementation(libs.gson)
+    implementation(libs.lottie.files)
 }

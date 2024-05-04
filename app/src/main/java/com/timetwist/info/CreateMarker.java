@@ -15,28 +15,27 @@ import androidx.fragment.app.DialogFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.timetwist.R;
 import com.timetwist.bottombar.MapFragment;
+import com.timetwist.firebase.FirestoreServices;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 public class CreateMarker extends DialogFragment {
-    private EditText placeName, placeDescription;
-    private final LatLng markerLatLng;
-    private String name, description;
-    private final MapFragment mapFragment;
-    private final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-    private final Map<String, Object> markerData = new HashMap<>();
-    private GeoPoint geoPoint;
+    private final FirestoreServices mFirestoreServices;
+    private final MapFragment mMapFragment;
+    private final FirebaseUser mCurrentUser;
+    private final LatLng mMarkerLatLng;
+    private EditText mPlaceName, mPlaceDescription;
+    private Button saveButton;
+    private String mType;
 
-    public CreateMarker(LatLng latLng, MapFragment mapFragment) {
-        markerLatLng = latLng;
-        this.mapFragment = mapFragment;
+    public CreateMarker(LatLng mMarkerLatLng, MapFragment mMapFragment) {
+        this.mMarkerLatLng = mMarkerLatLng;
+        this.mMapFragment = mMapFragment;
+        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mFirestoreServices = new FirestoreServices();
     }
 
     @Nullable
@@ -44,84 +43,50 @@ public class CreateMarker extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_create_marker, container, false);
 
-        placeName = view.findViewById(R.id.placeName);
-        placeDescription = view.findViewById(R.id.placeDescription);
-        Button saveButton = view.findViewById(R.id.save);
+        mPlaceName = view.findViewById(R.id.markerName);
+        mPlaceDescription = view.findViewById(R.id.markerDescription);
+        Button mChurch = view.findViewById(R.id.church);
+        Button mPrehistoricSite = view.findViewById(R.id.prehistoricSite);
+        saveButton = view.findViewById(R.id.save);
         Button closeButton = view.findViewById(R.id.close);
 
+        mChurch.setOnClickListener(v -> mType = "church");
+        mPrehistoricSite.setOnClickListener(v -> mType = "temple");
         closeButton.setOnClickListener(v -> dismiss());
-        saveButton.setOnClickListener(v -> saveMarkerToFireStore());
-
+        configureSaveButton();
 
         Objects.requireNonNull(Objects.requireNonNull(getDialog()).getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
         return view;
     }
 
     private void saveMarkerToFireStore() {
-        name = placeName.getText().toString().trim();
-        description = placeDescription.getText().toString().trim();
+        String name = mPlaceName.getText().toString().trim();
+        String description = mPlaceDescription.getText().toString().trim();
+        String type = mType;
 
-        if (currentUser != null && !name.isEmpty() && markerLatLng != null) {
-            geoPoint = new GeoPoint(markerLatLng.latitude, markerLatLng.longitude);
-
-            checkAdmin();
-        } else {
+        if (mCurrentUser == null || name.isEmpty() || mMarkerLatLng == null) {
             Toast.makeText(getContext(), "Marker name is required and user must be logged in.",
                     Toast.LENGTH_SHORT).show();
+            return;
         }
-    }
-
-    public void checkAdmin() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        assert currentUser != null;
-        db.collection("Users").document(currentUser.getUid()).get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists() && document.getBoolean("admin") != null && Boolean.TRUE.equals(document.getBoolean("admin"))) {
-                            saveMarkerToLocations();
-                        } else {
-                            addMarkerDb();
-                        }
-                        mapFragment.getMap().clear();
-                        mapFragment.addMarkersFromFirebase();
-                    } else {
-                        Toast.makeText(getContext(), "Failed to check admin status.",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    private void saveMarkerToLocations() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        name = placeName.getText().toString().trim();
-
-        markerData.put("name", name);
-        markerData.put("coordinates", geoPoint);
-        markerData.put("type", "m_church");
-        db.collection("Locations").document(name)
-                .set(markerData)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Marker saved to Locations with name: " + name, Toast.LENGTH_SHORT).show();
+        GeoPoint geoPoint = new GeoPoint(mMarkerLatLng.latitude, mMarkerLatLng.longitude);
+        mFirestoreServices.addMarkerDb(mCurrentUser.getUid(), name, description, type, geoPoint,
+                success -> {
+                    Toast.makeText(getContext(), success, Toast.LENGTH_SHORT).show();
+                    mMapFragment.refreshMapMarkers();
                     dismiss();
-                })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to save marker to Locations.", Toast.LENGTH_SHORT).show());
+                },
+                error -> Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show()
+        );
     }
 
-    private void addMarkerDb() {
-        assert currentUser != null;
-        String uid = currentUser.getUid();
-        markerData.put("name", name);
-        markerData.put("description", description);
-        markerData.put("coordinates", geoPoint);
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("Users").document(uid).collection("Markers").add(markerData)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(getContext(), "Marker saved!", Toast.LENGTH_SHORT).show();
-                    dismiss();
-                })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to save marker.",
-                        Toast.LENGTH_SHORT).show());
+    private void configureSaveButton() {
+        saveButton.setOnClickListener(v -> {
+            if (mType != null && !mType.isEmpty()) {
+                saveMarkerToFireStore();
+                return;
+            }
+            Toast.makeText(getContext(), "You must select a type for the marker.", Toast.LENGTH_SHORT).show();
+        });
     }
 }
-

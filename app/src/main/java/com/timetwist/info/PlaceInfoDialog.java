@@ -1,14 +1,13 @@
 package com.timetwist.info;
 
 import android.app.Dialog;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.text.method.LinkMovementMethod;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,10 +21,13 @@ import java.util.Objects;
 public class PlaceInfoDialog extends DialogFragment {
     private final String mTitle;
     private final String mDescription;
+    private final String mMarkerType;
+    private TextView mReadMore;
 
-    public PlaceInfoDialog(String title, String message) {
-        mTitle = title;
-        mDescription = message;
+    public PlaceInfoDialog(String mTitle, String mDescription, String mMarkerType) {
+        this.mTitle = mTitle;
+        this.mDescription = mDescription;
+        this.mMarkerType = mMarkerType;
     }
 
     @NonNull
@@ -35,27 +37,40 @@ public class PlaceInfoDialog extends DialogFragment {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.fragment_place_info_dialog, null);
 
+        mReadMore = view.findViewById(R.id.readMore);
         ImageButton cancelButton = view.findViewById(R.id.cancelID);
         TextView title = view.findViewById(R.id.placeTitle);
         TextView description = view.findViewById(R.id.placeDescription);
-        TextView placeLink = view.findViewById(R.id.placeLink);
+        description.setMovementMethod(new ScrollingMovementMethod());
 
         title.setText(mTitle);
         description.setText(mDescription);
-
+        configureReadMoreButton();
         cancelButton.setOnClickListener(v -> dismiss());
-
-        placeLink.setMovementMethod(LinkMovementMethod.getInstance());
-        placeLink.setOnClickListener(v -> {
-            String url = "https://en.wikipedia.org/wiki/" + mTitle.replaceAll(" ", "_");
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(browserIntent);
-        });
 
         builder.setView(view);
         AlertDialog dialog = builder.create();
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
 
         return dialog;
+    }
+
+    private void configureReadMoreButton() {
+        mReadMore.setOnClickListener(v -> {
+            switch (mMarkerType) {
+                case "church":
+
+                    break;
+                case "temple":
+
+                    break;
+                case "tree":
+
+                    break;
+                default:
+                    Toast.makeText(requireActivity(), "Something went Wrong", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
     }
 }

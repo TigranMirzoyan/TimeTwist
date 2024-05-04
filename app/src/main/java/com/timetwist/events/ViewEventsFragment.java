@@ -17,9 +17,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.timetwist.utils.ActivityUtils;
 import com.timetwist.MainActivity;
 import com.timetwist.R;
-import com.timetwist.bottombar.HomeFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +94,7 @@ public class ViewEventsFragment extends Fragment {
             if (mCurrentUser != null) {
                 if (getActivity() instanceof MainActivity) {
                     MainActivity mainActivity = (MainActivity) getActivity();
-                    mainActivity.replace(new HomeFragment());
+                    ActivityUtils.replace(mainActivity, ActivityUtils.HOME_FRAGMENT);
                 }
             }
         });

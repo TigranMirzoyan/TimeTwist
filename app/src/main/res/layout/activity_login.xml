@@ -55,8 +55,8 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_marginHorizontal="32dp"
                 android:layout_height="match_parent"
+                android:layout_marginHorizontal="32dp"
                 android:background="@drawable/background_white"
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
@@ -83,7 +83,7 @@
                     android:paddingEnd="16dp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white"
-                    android:textSize="16dp" />
+                    android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -107,7 +107,7 @@
                     android:paddingEnd="16dp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white"
-                    android:textSize="16dp" />
+                    android:textSize="16sp" />
 
                 <Button
                     android:id="@+id/loginButton"

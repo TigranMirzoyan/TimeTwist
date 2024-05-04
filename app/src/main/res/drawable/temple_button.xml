@@ -1,0 +1,9 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFCDA086" />
+            <corners android:radius="900dp" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/temple_button_vector" android:gravity="center" />
+</layer-list>

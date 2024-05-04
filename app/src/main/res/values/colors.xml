@@ -5,8 +5,8 @@
     <color name="dark_cyan">#008B8B</color>
     <color name="platinum">#F9F9F9</color>
     <color name="powder_blue">#B0E0E6</color>
-    <color name="turquoise">#48D1CC</color>
-    <color name="light_grayish_cyan">#E0F7FA</color>
+    <color name="turquoise">#CDA086</color>
+    <color name="light_grayish_cyan">#93A3A5</color>
     <color name="grey">#505050</color>
     <color name="capri">#5781f1</color>
     <color name="dark_blue">#011f34</color>
@@ -14,4 +14,5 @@
     <color name="albescent_white">#fee4d5</color>
     <color name="marian_blue">#434D94</color>
     <color name="amaranth_purple">#a22f4e</color>
+    <color name="navajoWhite">#FFCDA086</color>
 </resources>

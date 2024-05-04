@@ -19,10 +19,9 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.timetwist.utils.ActivityUtils;
 import com.timetwist.MainActivity;
 import com.timetwist.R;
-import com.timetwist.bottombar.HomeFragment;
-import com.timetwist.bottombar.ProfileFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -115,7 +114,7 @@ public class MakeEventFragment extends Fragment {
             if (mCurrentUser != null) {
                 if (getActivity() instanceof MainActivity) {
                     MainActivity mainActivity = (MainActivity) getActivity();
-                    mainActivity.replace(new HomeFragment());
+                    ActivityUtils.replace(mainActivity, ActivityUtils.HOME_FRAGMENT);
                 }
             }
         });
@@ -129,8 +128,6 @@ public class MakeEventFragment extends Fragment {
 
         com.google.firebase.Timestamp timestamp = new com.google.firebase.Timestamp(mCalendar.getTime());
 
-        ProfileFragment profileFragment = (ProfileFragment) getParentFragmentManager().findFragmentByTag("ProfileFragment");
-
         Map<String, Object> event = new HashMap<>();
         event.put("name", name);
         if (!TextUtils.isEmpty(description)) {
@@ -138,7 +135,6 @@ public class MakeEventFragment extends Fragment {
         }
         event.put("dateTime", timestamp);
         event.put("AEmail",mCurrentUser.getEmail());
-        event.put("username", profileFragment.getUsername());
 
         mFirestore.collection("Events")
                 .get()

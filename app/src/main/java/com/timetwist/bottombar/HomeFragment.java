@@ -12,14 +12,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.timetwist.utils.ActivityUtils;
 import com.timetwist.MainActivity;
 import com.timetwist.R;
-import com.timetwist.events.MakeEventFragment;
-import com.timetwist.events.ViewEventsFragment;
 
 public class HomeFragment extends Fragment {
     private Button mMakeEvent, viewEvents;
-    private FirebaseAuth mAuth;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,39 +30,32 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mMakeEvent = view.findViewById(R.id.makeEvent);
         viewEvents = view.findViewById(R.id.viewEvents);
-        mAuth = FirebaseAuth.getInstance();
 
         configureMakeEventButton();
-        configureViewEvensButton();
+        configureViewEventsButton();
     }
 
     private void configureMakeEventButton() {
         mMakeEvent.setOnClickListener(v -> {
-            if (checkIfVerified()) {
-                if (getActivity() instanceof MainActivity) {
-                    MainActivity mainActivity = (MainActivity) getActivity();
-                    mainActivity.replace(new MakeEventFragment());
-                }
-            } else {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null || !(getActivity() instanceof MainActivity)) {
                 Toast.makeText(requireActivity(), "User isn't authorized", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            MainActivity mainActivity = (MainActivity) getActivity();
+            ActivityUtils.replace(mainActivity, ActivityUtils.MAKE_EVENT_FRAGMENT);
         });
     }
 
-    private void configureViewEvensButton() {
+    private void configureViewEventsButton() {
         viewEvents.setOnClickListener(v -> {
-            if (checkIfVerified()) {
-                if (getActivity() instanceof MainActivity) {
-                    MainActivity mainActivity = (MainActivity) getActivity();
-                    mainActivity.replace(new ViewEventsFragment());
-                }
-            } else {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null || !(getActivity() instanceof MainActivity)) {
                 Toast.makeText(requireActivity(), "User isn't authorized", Toast.LENGTH_SHORT).show();
+                return;
             }
-        });
-    }
 
-    private boolean checkIfVerified() {
-        return mAuth.getCurrentUser() != null;
+            MainActivity mainActivity = (MainActivity) getActivity();
+            ActivityUtils.replace(mainActivity, ActivityUtils.VIEW_EVENTS_FRAGMENT);
+        });
     }
 }

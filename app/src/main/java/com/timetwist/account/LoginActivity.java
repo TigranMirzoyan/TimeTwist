@@ -1,45 +1,37 @@
 package com.timetwist.account;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.timetwist.MainActivity;
+import com.timetwist.utils.ActivityUtils;
 import com.timetwist.R;
-
-import java.util.Objects;
+import com.timetwist.firebase.FirebaseLoginRegister;
 
 public class LoginActivity extends AppCompatActivity {
+    private FirebaseLoginRegister mLoginRegister;
     private EditText mEmail, mPassword;
     private Button mLogin;
-    private TextView mSwitchToReg;
-    private ImageView mClose;
-    private FirebaseAuth mAuth;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        ImageView mClose = findViewById(R.id.closeActivity);
+        TextView mSwitchToRegister = findViewById(R.id.switchToRegister);
         mEmail = findViewById(R.id.email);
         mPassword = findViewById(R.id.password);
-        mSwitchToReg = findViewById(R.id.switchToRegister);
         mLogin = findViewById(R.id.loginButton);
-        mClose = findViewById(R.id.closeActivity);
+        mLoginRegister = new FirebaseLoginRegister(this);
 
-        mAuth = FirebaseAuth.getInstance();
-
-        configureRegisterToggleBtn();
+        mSwitchToRegister.setOnClickListener(v -> ActivityUtils.changeToRegisterActivity(this));
+        mClose.setOnClickListener(v -> ActivityUtils.changeToMainActivity(this));
         configureLoginButton();
-        configureCloseBtn();
     }
 
     private void configureLoginButton() {
@@ -62,47 +54,7 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             if (check) {
-                loginUser(email, password);
-            }
-        });
-    }
-
-
-    private void configureRegisterToggleBtn() {
-        mSwitchToReg.setOnClickListener(v -> {
-            startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
-            finish();
-        });
-    }
-
-    private void changeActivities() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        intent.putExtra("OpenProfileFragment", true);
-        startActivity(intent);
-        finish();
-    }
-
-    private void configureCloseBtn() {
-        mClose.setOnClickListener(v -> changeActivities());
-    }
-
-
-    private void loginUser(String email, String password) {
-
-        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-            FirebaseUser currentUser = mAuth.getCurrentUser();
-            if (currentUser == null || !currentUser.isEmailVerified()) {
-                mAuth.signOut();
-                mPassword.setText("");
-                Toast.makeText(LoginActivity.this, "Email isn't verified", Toast.LENGTH_SHORT).show();
-            } else {
-                if (task.isSuccessful()) {
-                    Toast.makeText(LoginActivity.this, "Logged in Successfully",
-                            Toast.LENGTH_SHORT).show();
-                    changeActivities();
-                } else {
-                    Toast.makeText(LoginActivity.this, "Login failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
-                }
+                mLoginRegister.loginUser(email, password);
             }
         });
     }

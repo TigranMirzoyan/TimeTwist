@@ -1,72 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true"
+    android:layout_marginHorizontal="10dp"
+    android:background="@drawable/info_background">
 
-    <RelativeLayout
+    <ImageButton
+        android:id="@+id/cancelID"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/close" />
+
+    <TextView
+        android:id="@+id/placeTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:background="@drawable/info_background"
-        android:layout_centerVertical="true">
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="64dp"
+        android:background="@drawable/background_red"
+        android:paddingHorizontal="16dp"
+        android:text=""
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        android:textStyle="bold" />
 
-        <ImageButton
-            android:id="@+id/cancelID"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="20dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/close" />
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/placeTitle"
+        android:layout_marginVertical="16dp"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp">
 
-        <ScrollView
-            android:id="@+id/Scroll_View"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="350dp"
-            android:layout_below="@id/cancelID"
-            android:layout_marginTop="10dp"
-            android:fillViewport="true">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Info:"
+            android:textColor="@color/amaranth_purple"
+            android:textSize="16sp" />
 
-            <LinearLayout
-                android:id="@+id/linearLayout2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+        <TextView
+            android:id="@+id/placeDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_red"
+            android:gravity="top|start"
+            android:lines="12"
+            android:overScrollMode="always"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="10dp"
+            android:scrollbars="vertical"
+            android:text=""
+            android:textColor="@color/white"
+            android:textSize="20sp" />
 
-                <TextView
-                    android:id="@+id/placeTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:text=""
-                    android:textColor="@color/black"
-                    android:textSize="28dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/placeDescription"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:paddingTop="10dp"
-                    android:text=""
-                    android:textColor="@color/black"
-                    android:textSize="20dp" />
-
-                <TextView
-                    android:id="@+id/placeLink"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:paddingLeft="10dp"
-                    android:paddingTop="10dp"
-                    android:text="Read more"
-                    android:textColor="@color/blue"
-                    android:textSize="16dp" />
-
-            </LinearLayout>
-        </ScrollView>
-    </RelativeLayout>
+        <TextView
+            android:id="@+id/readMore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Read more..."
+            android:textColor="@color/marian_blue"
+            android:textSize="16sp" />
+    </LinearLayout>
 </RelativeLayout>

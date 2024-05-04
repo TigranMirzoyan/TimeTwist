@@ -3,13 +3,11 @@ package com.timetwist.events;
 import java.util.Date;
 
 public class Event {
-    private String name;
-    private String username;
-    private String description;
-    private Date dateTime;
+    private final String name;
+    private final String username;
+    private final String description;
+    private final Date dateTime;
 
-    public Event() {
-    }
 
     public Event(String name, String username, String description, Date dateTime) {
         this.name = name;

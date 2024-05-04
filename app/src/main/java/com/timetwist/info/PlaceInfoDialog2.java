@@ -14,26 +14,26 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
-import com.timetwist.bottombar.MapFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.timetwist.R;
+import com.timetwist.bottombar.MapFragment;
 
 import java.util.Objects;
 
 public class PlaceInfoDialog2 extends DialogFragment {
     private final String mTitle;
     private final String mDescription;
-    private final String markerId;
+    private final String mMarkerId;
+    private final MapFragment mMapFragment;
     private Button mDeleteButton;
-    private final MapFragment mapFragment;
 
-    public PlaceInfoDialog2(String title, String message, MapFragment mapFragment, String markerId) {
-        mTitle = title;
-        mDescription = message;
-        this.mapFragment = mapFragment;
-        this.markerId = markerId;
+    public PlaceInfoDialog2(String mTitle, String mDescription, MapFragment mMapFragment, String mMarkerId) {
+        this.mTitle = mTitle;
+        this.mDescription = mDescription;
+        this.mMapFragment = mMapFragment;
+        this.mMarkerId = mMarkerId;
     }
 
     @NonNull
@@ -46,7 +46,7 @@ public class PlaceInfoDialog2 extends DialogFragment {
         ImageButton cancelButton = view.findViewById(R.id.cancelID);
         TextView title = view.findViewById(R.id.placeTitle);
         TextView description = view.findViewById(R.id.placeDescription);
-        mDeleteButton = view.findViewById(R.id.deleteBtn);  // Make sure this ID matches your layout
+        mDeleteButton = view.findViewById(R.id.deleteBtn);
 
         title.setText(mTitle);
         description.setText(mDescription);
@@ -61,25 +61,25 @@ public class PlaceInfoDialog2 extends DialogFragment {
         return dialog;
     }
 
-    public void configureDeleteButton(){
+    public void configureDeleteButton() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mDeleteButton.setOnClickListener(v -> {
-            if (currentUser != null && markerId != null) {
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                String userId = currentUser.getUid();
-
-                db.collection("Users").document(userId).collection("Markers").document(markerId)
-                        .delete()
-                        .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(getContext(), "Marker deleted successfully!", Toast.LENGTH_SHORT).show();
-                            mapFragment.getMap().clear();
-                            mapFragment.addMarkersFromFirebase();
-                            dismiss();
-                        })
-                        .addOnFailureListener(e -> Toast.makeText(getContext(), "Error deleting marker", Toast.LENGTH_SHORT).show());
-            } else {
+            if (currentUser == null || mMarkerId == null) {
                 Toast.makeText(getContext(), "No authenticated user found or invalid marker ID.", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            String userId = currentUser.getUid();
+
+            db.collection("Users").document(userId).collection("Markers").document(mMarkerId)
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(getContext(), "Marker deleted successfully!", Toast.LENGTH_SHORT).show();
+                        mMapFragment.refreshMapMarkers();
+                        dismiss();
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Error deleting marker", Toast.LENGTH_SHORT).show());
         });
     }
 }
