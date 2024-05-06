@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +16,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Marker;
 import com.timetwist.R;
 import com.timetwist.ui.manager.MapHelper;
 import com.timetwist.ui.manager.MapUIManager;
@@ -49,16 +49,11 @@ public class MapFragment extends Fragment {
         mMap = map;
         MapHelper.initializePlaces(requireActivity().getApplicationContext(), getString(R.string.my_map_Api_key));
         MapHelper.enableMyLocationIfPermitted(mMap, requireContext());
-        mMapUIManager = new MapUIManager(requireContext(), this, requireView(),
-                mMyLocationButton, mMap, mFusedLocationClient);
+        mMapUIManager = new MapUIManager(requireContext(), this,
+                requireView(), mMyLocationButton, mMap, mFusedLocationClient);
         mMapUIManager.configureMap(mAddMarkerButton, mChangeMarkers);
         mMapUIManager.configureCompassPlace();
         mMapUIManager.configureAutocomplete(getChildFragmentManager());
-        mMyLocationButton.setOnClickListener(__ -> mMapUIManager
-                .updateLocation(() -> Toast.makeText(requireContext(),
-                        "Please enable GPS", Toast.LENGTH_LONG).show()));
-        mMapUIManager.updateLocation(() -> Toast.makeText(requireContext(),
-                "Location unavailable", Toast.LENGTH_SHORT).show());
     }
 
     private void configureFusedLocationClient() {
@@ -72,8 +67,12 @@ public class MapFragment extends Fragment {
             Log.e("MapUIManager", "Cannot refresh markers ");
             return;
         }
-        mMap.clear();
+
+        mMapUIManager.startMarkerDownloadingProcess();
+        mMapUIManager.mCustomMarkers.forEach(Marker::remove);
+        mMapUIManager.mCustomMarkers.clear();
         mMapUIManager.addMarkersFromFirebase();
+        mMapUIManager.finishMarkerDownloadingProcess();
     }
 
     public void cancelDialog() {

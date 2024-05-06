@@ -53,8 +53,9 @@ public class MapUIManager {
     private static final int LAT_LNG_ZOOM = 15;
     private final FirestoreServices mFirestoreServices;
     private final List<Marker> mGlobalMarkers = new LinkedList<>();
-    private final List<Marker> mCustomMarkers = new LinkedList<>();
+    public final List<Marker> mCustomMarkers = new LinkedList<>();
     private final GoogleMap mMap;
+    private final FirebaseAuth mAuth;
     private final Context mContext;
     private final Fragment mFragment;
     private final View mRootView;
@@ -77,6 +78,7 @@ public class MapUIManager {
         this.mFirestoreServices = new FirestoreServices();
 
         mProgressBar = mRootView.findViewById(R.id.progressBar);
+        mAuth = FirebaseAuth.getInstance();
     }
 
     public void configureMap(Button mAddMarkerButton, TextView mChangeMarkers) {
@@ -84,15 +86,43 @@ public class MapUIManager {
             if (reason != GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
                 return;
             }
-            setIsAtCurrentLocation(false);
+            this.mIsAtCurrentLocation = false;
             updateMyLocationButtonDrawable();
         });
-        mAddMarkerButton.setOnClickListener(v -> mMap.setOnMapClickListener(this::addMarkerOnMapClick));
+
         mChangeMarkers.setOnClickListener(v -> configureChangeMarkersButton(mChangeMarkers));
+        configureAddMarkerButton(mAddMarkerButton);
         addMarkersFromFirebase();
+        mMyLocationButton.setOnClickListener(__ -> updateLocation(() -> Toast.makeText(mContext,
+                "Please enable GPS", Toast.LENGTH_LONG).show()));
+        updateLocation(() -> Toast.makeText(mContext,
+                "Location unavailable", Toast.LENGTH_SHORT).show());
+    }
+
+    public void configureAddMarkerButton(Button mAddMarkerButton) {
+        mAddMarkerButton.setOnClickListener(v -> {
+                    if (mAuth.getCurrentUser() == null) {
+                        Toast.makeText(mContext, "No authenticated user found.",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    } else if (NetworkUtils.isWifiDisconnected(mContext)) {
+                        Toast.makeText(mContext, "Wifi Required",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    mMap.setOnMapClickListener(this::addMarkerOnMapClick);
+                }
+        );
     }
 
     public void addMarkerOnMapClick(LatLng latLng) {
+        if (NetworkUtils.isWifiDisconnected(mContext)) {
+            Toast.makeText(mContext, "Wifi Required",
+                    Toast.LENGTH_SHORT).show();
+            mMap.setOnMapClickListener(null);
+            return;
+        }
         CreateMarker createMarkerDialog = new CreateMarker(latLng, (MapFragment) mFragment);
         createMarkerDialog.show(mFragment.getChildFragmentManager(), "firebase");
         mMap.setOnMapClickListener(null);
@@ -110,7 +140,7 @@ public class MapUIManager {
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-        layoutParams.setMargins(30, 0, 0, 100);
+        layoutParams.setMargins(30, 0, 0, 200);
         locationCompass.setLayoutParams(layoutParams);
     }
 
@@ -138,10 +168,6 @@ public class MapUIManager {
         mMyLocationButton.setBackground(ContextCompat.getDrawable(mContext,
                 mIsAtCurrentLocation ? R.drawable.my_location_visible :
                         R.drawable.my_location_not_visible));
-    }
-
-    public void setIsAtCurrentLocation(boolean isAtCurrentLocation) {
-        this.mIsAtCurrentLocation = isAtCurrentLocation;
     }
 
     public void configureAutocomplete(FragmentManager fragmentManager) {
@@ -174,8 +200,9 @@ public class MapUIManager {
 
     @SuppressLint("SetTextI18n")
     public void configureChangeMarkersButton(TextView mChangeMarkers) {
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            Toast.makeText(mContext, "No authenticated user found.", Toast.LENGTH_SHORT).show();
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(mContext, "No authenticated user found.",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -207,6 +234,9 @@ public class MapUIManager {
                         .icon(getBitmapDescriptorFromVectorDrawable(mContext,
                                 R.drawable.class.getField(type).getInt(null))));
                 marker.setTag("firebase");
+                if (mIsButtonClicked) {
+                    marker.setVisible(false);
+                }
                 mGlobalMarkers.add(marker);
             } catch (IllegalAccessException | NoSuchFieldException e) {
                 throw new RuntimeException(e);
@@ -217,25 +247,27 @@ public class MapUIManager {
     private void addCustomMarkers() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             configureMarkers();
-            Toast.makeText(mContext, "No authenticated user found.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "No authenticated user found.",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
-        mFirestoreServices.getUserCustomMarkers((latLng, name, type) -> {
+        mFirestoreServices.getUserCustomMarkers((latLng, name, type, documentId) -> {
             try {
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(latLng)
                         .title(name)
                         .icon(getBitmapDescriptorFromVectorDrawable(mContext,
                                 R.drawable.class.getField(type).getInt(null))));
-                marker.setVisible(false);
-                marker.setTag("custom");
+                if (!mIsButtonClicked) {
+                    marker.setVisible(false);
+                }
+                marker.setTag(documentId);
                 mCustomMarkers.add(marker);
             } catch (IllegalAccessException | NoSuchFieldException e) {
                 throw new RuntimeException(e);
             }
         }, message -> Log.e("MapUIManager", "Error adding user markers: " + message));
-
         configureMarkers();
     }
 
@@ -257,7 +289,8 @@ public class MapUIManager {
                 mArticle = CompletableFuture.supplyAsync(() -> WikipediaAPI.fetchArticle(title));
                 mArticle.thenAccept(result -> {
                     if (NetworkUtils.isWifiDisconnected(mContext)) {
-                        Toast.makeText(mContext, "Please turn on the WiFi", Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, "Please turn on the WiFi",
+                                Toast.LENGTH_LONG).show();
                         hideProgressBar();
                         enableFragmentInteraction();
                         return;
@@ -268,18 +301,18 @@ public class MapUIManager {
                     hideProgressBar();
                     enableFragmentInteraction();
                 });
-
                 return false;
             }
 
             if (NetworkUtils.isWifiDisconnected(mContext)) {
-                Toast.makeText(mContext, "Please turn on the WiFi", Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, "Please turn on the WiFi",
+                        Toast.LENGTH_LONG).show();
                 hideProgressBar();
                 enableFragmentInteraction();
                 return false;
             }
             PlaceInfoDialog2 dialogFragment = new PlaceInfoDialog2(title, marker.getSnippet(),
-                    (MapFragment) mFragment, markerType);
+                    (MapFragment) mFragment, (String) marker.getTag());
             dialogFragment.show(mFragment.getChildFragmentManager(), "PlaceInfoDialog2");
 
             hideProgressBar();
@@ -298,6 +331,16 @@ public class MapUIManager {
         enableFragmentInteraction();
     }
 
+    public void startMarkerDownloadingProcess() {
+        showProgressBar();
+        disableFragmentInteraction();
+    }
+
+    public void finishMarkerDownloadingProcess() {
+        hideProgressBar();
+        enableFragmentInteraction();
+    }
+
     private void disableFragmentInteraction() {
         new Handler(Looper.getMainLooper()).post(() -> {
             View overlayView = mRootView.findViewById(R.id.overlayView);
@@ -312,11 +355,11 @@ public class MapUIManager {
         });
     }
 
-    public void showProgressBar() {
+    private void showProgressBar() {
         new Handler(Looper.getMainLooper()).post(() -> mProgressBar.setVisibility(View.VISIBLE));
     }
 
-    public void hideProgressBar() {
+    private void hideProgressBar() {
         new Handler(Looper.getMainLooper()).post(() -> mProgressBar.setVisibility(View.GONE));
     }
 

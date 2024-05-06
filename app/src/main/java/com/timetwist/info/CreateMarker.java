@@ -19,6 +19,7 @@ import com.google.firebase.firestore.GeoPoint;
 import com.timetwist.R;
 import com.timetwist.bottombar.MapFragment;
 import com.timetwist.firebase.FirestoreServices;
+import com.timetwist.utils.NetworkUtils;
 
 import java.util.Objects;
 
@@ -40,7 +41,8 @@ public class CreateMarker extends DialogFragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_create_marker, container, false);
 
         mPlaceName = view.findViewById(R.id.markerName);
@@ -55,7 +57,8 @@ public class CreateMarker extends DialogFragment {
         closeButton.setOnClickListener(v -> dismiss());
         configureSaveButton();
 
-        Objects.requireNonNull(Objects.requireNonNull(getDialog()).getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
+        Objects.requireNonNull(Objects.requireNonNull(getDialog()).getWindow())
+                .setBackgroundDrawableResource(android.R.color.transparent);
         return view;
     }
 
@@ -64,11 +67,16 @@ public class CreateMarker extends DialogFragment {
         String description = mPlaceDescription.getText().toString().trim();
         String type = mType;
 
-        if (mCurrentUser == null || name.isEmpty() || mMarkerLatLng == null) {
-            Toast.makeText(getContext(), "Marker name is required and user must be logged in.",
+        if (name.isEmpty() || mMarkerLatLng == null) {
+            Toast.makeText(getContext(), "Marker name is required",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        } else if (mType == null) {
+            Toast.makeText(getContext(), "You must select a type for the marker",
                     Toast.LENGTH_SHORT).show();
             return;
         }
+
         GeoPoint geoPoint = new GeoPoint(mMarkerLatLng.latitude, mMarkerLatLng.longitude);
         mFirestoreServices.addMarkerDb(mCurrentUser.getUid(), name, description, type, geoPoint,
                 success -> {
@@ -82,11 +90,13 @@ public class CreateMarker extends DialogFragment {
 
     private void configureSaveButton() {
         saveButton.setOnClickListener(v -> {
-            if (mType != null && !mType.isEmpty()) {
-                saveMarkerToFireStore();
+            if (NetworkUtils.isWifiDisconnected(requireContext())) {
+                Toast.makeText(requireContext(), "Wifi Required",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
-            Toast.makeText(getContext(), "You must select a type for the marker.", Toast.LENGTH_SHORT).show();
+
+            saveMarkerToFireStore();
         });
     }
 }

@@ -1,4 +1,4 @@
-package com.timetwist.ui.manager;
+package com.timetwist.custom.consumers;
 
 @FunctionalInterface
 public interface TriConsumer<T, U, V> {

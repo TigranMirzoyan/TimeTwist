@@ -9,7 +9,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.timetwist.ui.manager.TriConsumer;
+import com.timetwist.custom.consumers.QuadConsumer;
+import com.timetwist.custom.consumers.TriConsumer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +80,7 @@ public class FirestoreServices {
         });
     }
 
-    public void getUserCustomMarkers(TriConsumer<LatLng, String, String> callback, Consumer<String> errorHandler) {
+    public void getUserCustomMarkers(QuadConsumer<LatLng, String, String, String> callback, Consumer<String> errorHandler) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
             errorHandler.accept("No authenticated user found.");
@@ -104,7 +105,7 @@ public class FirestoreServices {
                 }
 
                 LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
-                callback.accept(latLng, name, type);
+                callback.accept(latLng, name, type, document.getId());
             }
         });
     }
