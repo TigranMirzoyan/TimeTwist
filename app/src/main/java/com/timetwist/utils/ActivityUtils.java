@@ -16,18 +16,16 @@ import com.timetwist.account.RegisterActivity;
 import com.timetwist.bottombar.HomeFragment;
 import com.timetwist.bottombar.MapFragment;
 import com.timetwist.bottombar.ProfileFragment;
-import com.timetwist.events.MakeEventFragment;
-import com.timetwist.events.ViewEventsFragment;
 
 import nl.joery.animatedbottombar.AnimatedBottomBar;
 
 public class ActivityUtils {
-    public static final Fragment HOME_FRAGMENT = new HomeFragment();
-    public static final Fragment MAP_FRAGMENT = new MapFragment();
-    public static final Fragment PROFILE_FRAGMENT = new ProfileFragment();
-    public static final Fragment LOGIN_REGISTER_FRAGMENT = new LoginRegisterFragment();
-    public static final Fragment MAKE_EVENT_FRAGMENT = new MakeEventFragment();
-    public static final Fragment VIEW_EVENTS_FRAGMENT = new ViewEventsFragment();
+    public final HomeFragment HOME_FRAGMENT = new HomeFragment();
+    public final MapFragment MAP_FRAGMENT = new MapFragment();
+    public final ProfileFragment PROFILE_FRAGMENT = new ProfileFragment();
+    public final LoginRegisterFragment LOGIN_REGISTER_FRAGMENT = new LoginRegisterFragment();
+    public final LoginRegisterFragment MAKE_EVENT_FRAGMENT = new LoginRegisterFragment();
+    public final LoginRegisterFragment VIEW_EVENTS_FRAGMENT = new LoginRegisterFragment();
     private static Fragment mCurrentFragment;
 
     public static void changeToRegisterActivity(Context context) {
@@ -45,7 +43,7 @@ public class ActivityUtils {
         context.startActivity(intent);
     }
 
-    public static void replace(FragmentActivity activity, Fragment newFragment) {
+    public void replace(FragmentActivity activity, Fragment newFragment) {
         if (activity == null || activity.isFinishing()) {
             return;
         }
@@ -65,7 +63,7 @@ public class ActivityUtils {
     }
 
 
-    public static void selectFragment(FragmentActivity activity, int tabId) {
+    public void selectFragment(FragmentActivity activity, int tabId) {
         Fragment selectedFragment = null;
 
         if (tabId == R.id.home) {
@@ -85,7 +83,7 @@ public class ActivityUtils {
     }
 
 
-    public static void chooseFragment(FragmentActivity activity, AnimatedBottomBar mBottomBar) {
+    public void chooseFragment(FragmentActivity activity, AnimatedBottomBar mBottomBar) {
         Intent intent = activity.getIntent();
         boolean openProfileFragment = intent.getBooleanExtra("OpenProfileFragment", false);
         Fragment selectedFragment;
@@ -100,7 +98,7 @@ public class ActivityUtils {
             selectedFragment = PROFILE_FRAGMENT;
         }
 
-        ActivityUtils.replace(activity, selectedFragment);
+        replace(activity, selectedFragment);
         mBottomBar.selectTabById(R.id.profile, false);
     }
 }

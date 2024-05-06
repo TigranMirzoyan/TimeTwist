@@ -31,10 +31,11 @@ import java.util.Map;
 
 
 public class MakeEventFragment extends Fragment {
+    private final Calendar mCalendar = Calendar.getInstance();
+    private ActivityUtils mActivityUtils;
     private TextView mDataTime;
     private EditText mEventDescription, mEventName;
     private Button mMakeEvent, mBack;
-    private final Calendar mCalendar = Calendar.getInstance();
     private FirebaseFirestore mFirestore;
     private FirebaseUser mCurrentUser;
 
@@ -51,6 +52,7 @@ public class MakeEventFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mFirestore = FirebaseFirestore.getInstance();
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mActivityUtils = new ActivityUtils();
 
         mBack = view.findViewById(R.id.closeFragment);
         mDataTime = view.findViewById(R.id.dataTime);
@@ -114,7 +116,7 @@ public class MakeEventFragment extends Fragment {
             if (mCurrentUser != null) {
                 if (getActivity() instanceof MainActivity) {
                     MainActivity mainActivity = (MainActivity) getActivity();
-                    ActivityUtils.replace(mainActivity, ActivityUtils.HOME_FRAGMENT);
+                    mActivityUtils.replace(mainActivity, mActivityUtils.HOME_FRAGMENT);
                 }
             }
         });

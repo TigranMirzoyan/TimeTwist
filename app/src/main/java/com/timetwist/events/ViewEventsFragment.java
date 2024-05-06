@@ -26,12 +26,13 @@ import java.util.List;
 import java.util.Random;
 
 public class ViewEventsFragment extends Fragment {
+    private final List<Event> randomEventList = new ArrayList<>();
+    private final List<Event> eventList = new ArrayList<>();
+    private ActivityUtils mActivityUtils;
     private Button mBack;
     private RecyclerView mRecyclerView;
     private FirebaseFirestore db;
-    FirebaseUser mCurrentUser;
-    private final List<Event> randomEventList = new ArrayList<>();
-    private final List<Event> eventList = new ArrayList<>();
+    private FirebaseUser mCurrentUser;
     private SearchView mSearchView;
 
     @Override
@@ -45,6 +46,8 @@ public class ViewEventsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Button refreshButton = view.findViewById(R.id.refresh);
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        mActivityUtils = new ActivityUtils();
+
         //mMyEvents = view.findViewById(R.id.myEvents);
         mBack = view.findViewById(R.id.closeFragment);
         mRecyclerView = view.findViewById(R.id.recyclerView);
@@ -94,7 +97,7 @@ public class ViewEventsFragment extends Fragment {
             if (mCurrentUser != null) {
                 if (getActivity() instanceof MainActivity) {
                     MainActivity mainActivity = (MainActivity) getActivity();
-                    ActivityUtils.replace(mainActivity, ActivityUtils.HOME_FRAGMENT);
+                    mActivityUtils.replace(mainActivity, mActivityUtils.HOME_FRAGMENT);
                 }
             }
         });

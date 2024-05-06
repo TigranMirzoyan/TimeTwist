@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,10 +26,10 @@ import java.util.Objects;
 public class MapFragment extends Fragment {
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
-    private Button mMyLocationButton, mAddMarkerButton, mChangeMarkers;
+    private Button mMyLocationButton, mAddMarkerButton;
+    private TextView mChangeMarkers;
     private MapUIManager mMapUIManager;
-    private boolean methodsDone = false;
-    private ProgressBar mProgressBar;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_map, container, false);
@@ -49,18 +49,22 @@ public class MapFragment extends Fragment {
         mMap = map;
         MapHelper.initializePlaces(requireActivity().getApplicationContext(), getString(R.string.my_map_Api_key));
         MapHelper.enableMyLocationIfPermitted(mMap, requireContext());
-        mMapUIManager = new MapUIManager(requireContext(), this, requireView(), mMyLocationButton, mMap, mFusedLocationClient);
+        mMapUIManager = new MapUIManager(requireContext(), this, requireView(),
+                mMyLocationButton, mMap, mFusedLocationClient);
+        mMapUIManager.configureMap(mAddMarkerButton, mChangeMarkers);
         mMapUIManager.configureCompassPlace();
-        mMyLocationButton.setOnClickListener(__ -> mMapUIManager.moveToCurrentLocation());
         mMapUIManager.configureAutocomplete(getChildFragmentManager());
-        mMapUIManager.configureMap(mAddMarkerButton);
-        mMapUIManager.updateLocation(() -> Toast.makeText(requireContext(), "Location unavailable", Toast.LENGTH_SHORT).show());
-        methodsDone = true;
+        mMyLocationButton.setOnClickListener(__ -> mMapUIManager
+                .updateLocation(() -> Toast.makeText(requireContext(),
+                        "Please enable GPS", Toast.LENGTH_LONG).show()));
+        mMapUIManager.updateLocation(() -> Toast.makeText(requireContext(),
+                "Location unavailable", Toast.LENGTH_SHORT).show());
     }
 
     private void configureFusedLocationClient() {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-        ((SupportMapFragment) Objects.requireNonNull(getChildFragmentManager().findFragmentById(R.id.map))).getMapAsync(this::onMapReady);
+        ((SupportMapFragment) Objects.requireNonNull(getChildFragmentManager()
+                .findFragmentById(R.id.map))).getMapAsync(this::onMapReady);
     }
 
     public void refreshMapMarkers() {
@@ -72,7 +76,7 @@ public class MapFragment extends Fragment {
         mMapUIManager.addMarkersFromFirebase();
     }
 
-    public boolean areMethodsDone() {
-        return methodsDone;
+    public void cancelDialog() {
+        mMapUIManager.cancelDialog();
     }
 }

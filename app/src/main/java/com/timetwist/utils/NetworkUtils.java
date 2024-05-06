@@ -7,18 +7,18 @@ import android.net.NetworkCapabilities;
 
 public class NetworkUtils {
 
-    public static boolean isWifiConnected(Context context) {
+    public static boolean isWifiDisconnected(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager == null) {
-            return false;
+            return true;
         }
 
         Network network = connectivityManager.getActiveNetwork();
         if (network == null) {
-            return false;
+            return true;
         }
 
         NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
-        return capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+        return capabilities == null || !capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
     }
 }

@@ -17,6 +17,7 @@ import com.timetwist.MainActivity;
 import com.timetwist.R;
 
 public class HomeFragment extends Fragment {
+    private ActivityUtils mActivityUtils;
     private Button mMakeEvent, viewEvents;
 
     @Override
@@ -30,6 +31,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mMakeEvent = view.findViewById(R.id.makeEvent);
         viewEvents = view.findViewById(R.id.viewEvents);
+        mActivityUtils = new ActivityUtils();
 
         configureMakeEventButton();
         configureViewEventsButton();
@@ -43,7 +45,7 @@ public class HomeFragment extends Fragment {
             }
 
             MainActivity mainActivity = (MainActivity) getActivity();
-            ActivityUtils.replace(mainActivity, ActivityUtils.MAKE_EVENT_FRAGMENT);
+            mActivityUtils.replace(mainActivity, mActivityUtils.MAKE_EVENT_FRAGMENT);
         });
     }
 
@@ -55,7 +57,7 @@ public class HomeFragment extends Fragment {
             }
 
             MainActivity mainActivity = (MainActivity) getActivity();
-            ActivityUtils.replace(mainActivity, ActivityUtils.VIEW_EVENTS_FRAGMENT);
+            mActivityUtils.replace(mainActivity, mActivityUtils.VIEW_EVENTS_FRAGMENT);
         });
     }
 }
