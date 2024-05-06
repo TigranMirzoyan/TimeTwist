@@ -16,6 +16,8 @@ import com.timetwist.account.RegisterActivity;
 import com.timetwist.bottombar.HomeFragment;
 import com.timetwist.bottombar.MapFragment;
 import com.timetwist.bottombar.ProfileFragment;
+import com.timetwist.events.MakeEventFragment;
+import com.timetwist.events.ViewEventsFragment;
 
 import nl.joery.animatedbottombar.AnimatedBottomBar;
 
@@ -24,8 +26,8 @@ public class ActivityUtils {
     public final MapFragment MAP_FRAGMENT = new MapFragment();
     public final ProfileFragment PROFILE_FRAGMENT = new ProfileFragment();
     public final LoginRegisterFragment LOGIN_REGISTER_FRAGMENT = new LoginRegisterFragment();
-    public final LoginRegisterFragment MAKE_EVENT_FRAGMENT = new LoginRegisterFragment();
-    public final LoginRegisterFragment VIEW_EVENTS_FRAGMENT = new LoginRegisterFragment();
+    public final MakeEventFragment MAKE_EVENT_FRAGMENT = new MakeEventFragment();
+    public final ViewEventsFragment VIEW_EVENTS_FRAGMENT = new ViewEventsFragment();
     private static Fragment mCurrentFragment;
 
     public static void changeToRegisterActivity(Context context) {

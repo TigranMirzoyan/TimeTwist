@@ -60,10 +60,10 @@ public class MapUIManager {
     private final View mRootView;
     private final Button mMyLocationButton;
     private final FusedLocationProviderClient mFusedLocationClient;
-    private boolean mIsAtCurrentLocation = false;
     private final ProgressBar mProgressBar;
-    private boolean mIsChangeButtonClicked = false;
     private CompletableFuture<String> mArticle;
+    private boolean mIsAtCurrentLocation = false;
+    public boolean mIsButtonClicked = false;
 
     public MapUIManager(Context mContext, Fragment mFragment, View mRootView,
                         Button mMyLocationButton, GoogleMap mMap,
@@ -79,7 +79,7 @@ public class MapUIManager {
         mProgressBar = mRootView.findViewById(R.id.progressBar);
     }
 
-    public void configureMap(Button mAddMarkerButton,TextView mChangeMarkers) {
+    public void configureMap(Button mAddMarkerButton, TextView mChangeMarkers) {
         mMap.setOnCameraMoveStartedListener(reason -> {
             if (reason != GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
                 return;
@@ -173,24 +173,24 @@ public class MapUIManager {
     }
 
     @SuppressLint("SetTextI18n")
-    public void configureChangeMarkersButton(TextView mChangeMarkers){
-            if (FirebaseAuth.getInstance().getCurrentUser() == null){
-                Toast.makeText(mContext, "No authenticated user found.", Toast.LENGTH_SHORT).show();
-                return;
-            }
+    public void configureChangeMarkersButton(TextView mChangeMarkers) {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Toast.makeText(mContext, "No authenticated user found.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            if (!mIsChangeButtonClicked){
-                mChangeMarkers.setText("Global Markers");
-                mGlobalMarkers.forEach(marker -> marker.setVisible(false));
-                mCustomMarkers.forEach(marker -> marker.setVisible(true));
-                mIsChangeButtonClicked = !mIsChangeButtonClicked;
-                return;
-            }
+        if (!mIsButtonClicked) {
+            mChangeMarkers.setText("Global Markers");
+            mGlobalMarkers.forEach(marker -> marker.setVisible(false));
+            mCustomMarkers.forEach(marker -> marker.setVisible(true));
+            mIsButtonClicked = !mIsButtonClicked;
+            return;
+        }
 
-            mChangeMarkers.setText("My Markers");
-            mGlobalMarkers.forEach(marker -> marker.setVisible(true));
-            mCustomMarkers.forEach(marker -> marker.setVisible(false));
-            mIsChangeButtonClicked = !mIsChangeButtonClicked;
+        mChangeMarkers.setText("My Markers");
+        mGlobalMarkers.forEach(marker -> marker.setVisible(true));
+        mCustomMarkers.forEach(marker -> marker.setVisible(false));
+        mIsButtonClicked = !mIsButtonClicked;
     }
 
     public void addMarkersFromFirebase() {
