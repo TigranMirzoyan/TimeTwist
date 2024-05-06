@@ -71,7 +71,8 @@ public class MakeEventFragment extends Fragment {
             mCalendar.set(Calendar.MONTH, monthOfYear);
             mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             showTimePicker();
-        }, mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH), mCalendar.get(Calendar.DAY_OF_MONTH)).show();
+        }, mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH),
+                mCalendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     private void showTimePicker() {
@@ -93,7 +94,8 @@ public class MakeEventFragment extends Fragment {
             String dataTime = mDataTime.getText().toString().trim();
             String description = mEventDescription.getText().toString().trim();
 
-            if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(dataTime) && description.length() <= 50) {
+            if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(dataTime)
+                    && description.length() <= 50) {
                 if (mCurrentUser != null) {
                     sendToFirebase(name, description);
                 }
@@ -102,7 +104,8 @@ public class MakeEventFragment extends Fragment {
                     mEventName.setError("Name is required");
                 }
                 if (TextUtils.isEmpty(mDataTime.getText().toString())) {
-                    Toast.makeText(getContext(), "Please add the time", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Please add the time",
+                            Toast.LENGTH_SHORT).show();
                 }
                 if (description.length() >= 50) {
                     mEventDescription.setError("Too big description (>50)");
@@ -114,9 +117,9 @@ public class MakeEventFragment extends Fragment {
     private void configureBackButton() {
         mBack.setOnClickListener(v -> {
             if (mCurrentUser != null) {
-                if (getActivity() instanceof MainActivity) {
-                    MainActivity mainActivity = (MainActivity) getActivity();
-                    mActivityUtils.replace(mainActivity, mActivityUtils.HOME_FRAGMENT);
+                if (requireActivity() instanceof MainActivity) {
+                    mActivityUtils.replace(requireActivity()
+                            .getSupportFragmentManager(), mActivityUtils.HOME_FRAGMENT);
                 }
             }
         });
@@ -124,7 +127,8 @@ public class MakeEventFragment extends Fragment {
 
     private void sendToFirebase(String name, String description) {
         if (mCurrentUser == null || TextUtils.isEmpty(mCurrentUser.getEmail())) {
-            Toast.makeText(getContext(), "User is not authenticated", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(),
+                    "User is not authenticated", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -143,11 +147,14 @@ public class MakeEventFragment extends Fragment {
                 .addOnSuccessListener(queryDocumentSnapshots -> mFirestore.collection("Events")
                         .add(event)
                         .addOnSuccessListener(documentReference ->
-                                Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_SHORT).show())
+                                Toast.makeText(getContext(),
+                                        "Event created successfully!", Toast.LENGTH_SHORT).show())
                         .addOnFailureListener(e ->
-                                Toast.makeText(getContext(), "Failed to create event", Toast.LENGTH_SHORT).show()))
+                                Toast.makeText(getContext(),
+                                        "Failed to create event", Toast.LENGTH_SHORT).show()))
                 .addOnFailureListener(e ->
-                        Toast.makeText(getContext(), "Failed to find user by email", Toast.LENGTH_SHORT).show());
+                        Toast.makeText(getContext(),
+                                "Failed to find user by email", Toast.LENGTH_SHORT).show());
 
         mEventName.getText().clear();
         mEventDescription.getText().clear();

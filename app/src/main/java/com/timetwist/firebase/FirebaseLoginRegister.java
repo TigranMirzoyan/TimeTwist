@@ -23,7 +23,7 @@ public class FirebaseLoginRegister {
     public void loginUser(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             FirebaseUser currentUser = mAuth.getCurrentUser();
-            if (!Objects.requireNonNull(currentUser).isEmailVerified()) {
+            if (currentUser != null && !currentUser.isEmailVerified()) {
                 mAuth.signOut();
                 Toast.makeText(mContext, "Email isn't verified", Toast.LENGTH_SHORT).show();
                 return;

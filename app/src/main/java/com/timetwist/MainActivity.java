@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     private AnimatedBottomBar mBottomBar;
     private boolean mIsMapInitialized = false;
     private ActivityUtils mActivityUtils;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         mBottomBar = findViewById(R.id.bottomBar);
         mActivityUtils = new ActivityUtils();
 
-        mActivityUtils.replace(this, mActivityUtils.HOME_FRAGMENT);
+        mActivityUtils.replace(getSupportFragmentManager(), mActivityUtils.HOME_FRAGMENT);
         mActivityUtils.chooseFragment(this, mBottomBar);
         setupBottomBarItemSelection();
     }
@@ -36,13 +37,13 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
 
-            if (R.id.map == tabId){
+            if (R.id.map == tabId) {
                 mIsMapInitialized = true;
             }
-            if (R.id.map == Objects.requireNonNull(lastTab).getId()){
+            if (R.id.map == Objects.requireNonNull(lastTab).getId()) {
                 mActivityUtils.MAP_FRAGMENT.cancelDialog();
             }
-            mActivityUtils.selectFragment(MainActivity.this, tabId);
+            mActivityUtils.selectFragment(getSupportFragmentManager(), tabId);
             return true;
         });
     }

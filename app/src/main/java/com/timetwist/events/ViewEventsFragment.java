@@ -95,9 +95,8 @@ public class ViewEventsFragment extends Fragment {
     private void configureBackButton() {
         mBack.setOnClickListener(v -> {
             if (mCurrentUser != null) {
-                if (getActivity() instanceof MainActivity) {
-                    MainActivity mainActivity = (MainActivity) getActivity();
-                    mActivityUtils.replace(mainActivity, mActivityUtils.HOME_FRAGMENT);
+                if (requireActivity() instanceof MainActivity) {
+                    mActivityUtils.replace(requireActivity().getSupportFragmentManager(), mActivityUtils.HOME_FRAGMENT);
                 }
             }
         });

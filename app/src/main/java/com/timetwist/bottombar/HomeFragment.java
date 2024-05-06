@@ -43,9 +43,7 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireActivity(), "User isn't authorized", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            MainActivity mainActivity = (MainActivity) getActivity();
-            mActivityUtils.replace(mainActivity, mActivityUtils.MAKE_EVENT_FRAGMENT);
+            mActivityUtils.replace(requireActivity().getSupportFragmentManager(), mActivityUtils.MAKE_EVENT_FRAGMENT);
         });
     }
 
@@ -55,9 +53,7 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireActivity(), "User isn't authorized", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            MainActivity mainActivity = (MainActivity) getActivity();
-            mActivityUtils.replace(mainActivity, mActivityUtils.VIEW_EVENTS_FRAGMENT);
+            mActivityUtils.replace(requireActivity().getSupportFragmentManager(), mActivityUtils.VIEW_EVENTS_FRAGMENT);
         });
     }
 }

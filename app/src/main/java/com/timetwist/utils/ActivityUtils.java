@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,12 +46,12 @@ public class ActivityUtils {
         context.startActivity(intent);
     }
 
-    public void replace(FragmentActivity activity, Fragment newFragment) {
-        if (activity == null || activity.isFinishing()) {
+    public void replace(FragmentManager fragmentManager, Fragment newFragment) {
+        if (fragmentManager == null) {
             return;
         }
 
-        FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
         if (mCurrentFragment != null) {
             transaction.hide(mCurrentFragment);
         }
@@ -65,7 +66,7 @@ public class ActivityUtils {
     }
 
 
-    public void selectFragment(FragmentActivity activity, int tabId) {
+    public void selectFragment(FragmentManager fragmentManager, int tabId) {
         Fragment selectedFragment = null;
 
         if (tabId == R.id.home) {
@@ -80,12 +81,13 @@ public class ActivityUtils {
             selectedFragment = MAP_FRAGMENT;
         }
         if (selectedFragment != null) {
-            replace(activity, selectedFragment);
+            replace(fragmentManager, selectedFragment);
         }
     }
 
 
     public void chooseFragment(FragmentActivity activity, AnimatedBottomBar mBottomBar) {
+        FragmentManager fragmentManager = activity.getSupportFragmentManager();
         Intent intent = activity.getIntent();
         boolean openProfileFragment = intent.getBooleanExtra("OpenProfileFragment", false);
         Fragment selectedFragment;
@@ -100,7 +102,7 @@ public class ActivityUtils {
             selectedFragment = PROFILE_FRAGMENT;
         }
 
-        replace(activity, selectedFragment);
+        replace(fragmentManager, selectedFragment);
         mBottomBar.selectTabById(R.id.profile, false);
     }
 }
