@@ -1,4 +1,4 @@
-package com.timetwist.info;
+package com.timetwist.ui.manager;
 
 import com.google.gson.Gson;
 

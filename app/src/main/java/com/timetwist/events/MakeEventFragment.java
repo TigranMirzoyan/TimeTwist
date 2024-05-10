@@ -52,7 +52,8 @@ public class MakeEventFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mFirestore = FirebaseFirestore.getInstance();
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        mActivityUtils = new ActivityUtils();
+
+        mActivityUtils = ActivityUtils.getInstance();
 
         mBack = view.findViewById(R.id.closeFragment);
         mDataTime = view.findViewById(R.id.dataTime);

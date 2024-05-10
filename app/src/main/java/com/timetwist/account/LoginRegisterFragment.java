@@ -14,7 +14,8 @@ import com.timetwist.utils.ActivityUtils;
 import com.timetwist.R;
 
 public class LoginRegisterFragment extends Fragment {
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_login_register,
                 container, false);
     }
@@ -25,7 +26,9 @@ public class LoginRegisterFragment extends Fragment {
         TextView mRegister = view.findViewById(R.id.regBtn);
         TextView mLogin = view.findViewById(R.id.loginBtn);
 
-        mLogin.setOnClickListener(v -> ActivityUtils.changeToLoginActivity(requireActivity()));
-        mRegister.setOnClickListener(v -> ActivityUtils.changeToRegisterActivity(requireActivity()));
+        mLogin.setOnClickListener(v -> ActivityUtils
+                .changeToLoginActivity(requireActivity()));
+        mRegister.setOnClickListener(v -> ActivityUtils
+                .changeToRegisterActivity(requireActivity()));
     }
 }

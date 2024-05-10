@@ -31,7 +31,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mMakeEvent = view.findViewById(R.id.makeEvent);
         viewEvents = view.findViewById(R.id.viewEvents);
-        mActivityUtils = new ActivityUtils();
+        mActivityUtils = ActivityUtils.getInstance();
 
         configureMakeEventButton();
         configureViewEventsButton();
@@ -39,7 +39,7 @@ public class HomeFragment extends Fragment {
 
     private void configureMakeEventButton() {
         mMakeEvent.setOnClickListener(v -> {
-            if (FirebaseAuth.getInstance().getCurrentUser() == null || !(getActivity() instanceof MainActivity)) {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null || !(requireActivity() instanceof MainActivity)) {
                 Toast.makeText(requireActivity(), "User isn't authorized", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -49,7 +49,7 @@ public class HomeFragment extends Fragment {
 
     private void configureViewEventsButton() {
         viewEvents.setOnClickListener(v -> {
-            if (FirebaseAuth.getInstance().getCurrentUser() == null || !(getActivity() instanceof MainActivity)) {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null || !(requireActivity() instanceof MainActivity)) {
                 Toast.makeText(requireActivity(), "User isn't authorized", Toast.LENGTH_SHORT).show();
                 return;
             }

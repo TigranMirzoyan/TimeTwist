@@ -40,6 +40,14 @@
         android:paddingHorizontal="16dp">
 
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Info:"
+            android:textColor="@color/amaranth_purple"
+            android:textSize="16sp" />
+
+        <TextView
             android:id="@+id/placeDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -56,8 +64,8 @@
 
         <Button
             android:id="@+id/deleteBtn"
-            android:layout_width="65dp"
-            android:layout_height="65dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginTop="20dp"
             android:background="@drawable/delete_btn"
             android:paddingTop="12dp" />

@@ -13,27 +13,31 @@ import java.util.Objects;
 import nl.joery.animatedbottombar.AnimatedBottomBar;
 
 public class MainActivity extends AppCompatActivity {
+    private ActivityUtils mActivityUtils;
     private AnimatedBottomBar mBottomBar;
     private boolean mIsMapInitialized = false;
-    private ActivityUtils mActivityUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mBottomBar = findViewById(R.id.bottomBar);
-        mActivityUtils = new ActivityUtils();
-
+        mActivityUtils = ActivityUtils.getInstance();
         mActivityUtils.replace(getSupportFragmentManager(), mActivityUtils.HOME_FRAGMENT);
-        mActivityUtils.chooseFragment(this, mBottomBar);
+        mActivityUtils.chooseFragment(getSupportFragmentManager(), mBottomBar, getIntent());
+        mActivityUtils.initializeFragments(getSupportFragmentManager());
+
         setupBottomBarItemSelection();
     }
 
     private void setupBottomBarItemSelection() {
         mBottomBar.setOnTabInterceptListener((lastIndex, lastTab, newIndex, newTab) -> {
             int tabId = newTab.getId();
-            if (!mIsMapInitialized && NetworkUtils.isWifiDisconnected(MainActivity.this) && R.id.map == tabId) {
-                Toast.makeText(MainActivity.this, "Internet connection is required to view the map", Toast.LENGTH_LONG).show();
+            if (!mIsMapInitialized && NetworkUtils.isWifiDisconnected(MainActivity.this)
+                    && R.id.map == tabId) {
+                Toast.makeText(MainActivity.this,
+                        "Internet connection is required to view the map",
+                        Toast.LENGTH_LONG).show();
                 return false;
             }
 

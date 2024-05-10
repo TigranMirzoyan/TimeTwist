@@ -29,8 +29,10 @@ public class LoginActivity extends AppCompatActivity {
         mLogin = findViewById(R.id.loginButton);
         mLoginRegister = new FirebaseLoginRegister(this);
 
-        mSwitchToRegister.setOnClickListener(v -> ActivityUtils.changeToRegisterActivity(this));
-        mClose.setOnClickListener(v -> ActivityUtils.changeToMainActivity(this));
+        mSwitchToRegister.setOnClickListener(v -> ActivityUtils
+                .changeToRegisterActivity(this));
+        mClose.setOnClickListener(v -> ActivityUtils
+                .changeToMainActivity(this));
         configureLoginButton();
     }
 

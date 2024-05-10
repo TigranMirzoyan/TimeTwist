@@ -8,6 +8,12 @@ public class Event {
     private final String description;
     private final Date dateTime;
 
+    public Event() {
+        this.name = "";
+        this.username = "";
+        this.description = "";
+        this.dateTime = new Date();
+    }
 
     public Event(String name, String username, String description, Date dateTime) {
         this.name = name;

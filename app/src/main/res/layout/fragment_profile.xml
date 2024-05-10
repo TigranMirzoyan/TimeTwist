@@ -29,72 +29,82 @@
             android:textSize="40sp"
             android:textStyle="bold" />
 
-        <ScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/background_white"
                 android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/background_white"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Username"
+                    android:textColor="@color/amaranth_purple" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="32dp"
-                        android:layout_marginBottom="8dp"
-                        android:text="Username"
-                        android:textColor="@color/amaranth_purple" />
+                <TextView
+                    android:id="@+id/username"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@drawable/background_red"
+                    android:padding="14dp"
+                    android:text=""
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="italic" />
 
-                    <TextView
-                        android:id="@+id/username"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginHorizontal="16dp"
-                        android:background="@drawable/background_red"
-                        android:padding="14dp"
-                        android:text=""
-                        android:textColor="@color/white"
-                        android:textSize="16sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Email"
+                    android:textColor="@color/amaranth_purple" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="32dp"
-                        android:layout_marginBottom="8dp"
-                        android:text="Email"
-                        android:textColor="@color/amaranth_purple" />
-
-                    <TextView
-                        android:id="@+id/email"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginBottom="32dp"
-                        android:background="@drawable/background_red"
-                        android:padding="14dp"
-                        android:text=""
-                        android:textColor="@color/white"
-                        android:textSize="16sp" />
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/email"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="32dp"
+                    android:background="@drawable/background_red"
+                    android:padding="14dp"
+                    android:text=""
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="italic" />
             </LinearLayout>
-        </ScrollView>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/favorite_places"
+            style="@android:style/Widget.Button"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/background_red"
+            android:text="Favorite places"
+            android:textColor="@color/white"
+            android:textSize="26sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <Button
         android:id="@+id/logOutButton"
         style="@android:style/Widget.Button"
-        android:layout_width="150dp"
-        android:layout_height="50dp"
+        android:layout_width="128dp"
+        android:layout_height="64dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_marginEnd="20dp"
@@ -102,5 +112,6 @@
         android:background="@drawable/background_red"
         android:text="Log Out"
         android:textColor="@color/white"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:textStyle="bold" />
 </RelativeLayout>

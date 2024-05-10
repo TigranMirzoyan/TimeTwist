@@ -1,15 +1,18 @@
 package com.timetwist.info;
 
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -24,42 +27,62 @@ import com.timetwist.utils.NetworkUtils;
 import java.util.Objects;
 
 public class CreateMarker extends DialogFragment {
-    private final FirestoreServices mFirestoreServices;
     private final MapFragment mMapFragment;
-    private final FirebaseUser mCurrentUser;
     private final LatLng mMarkerLatLng;
+    private FirestoreServices mFirestoreServices;
+    private FirebaseUser mCurrentUser;
     private EditText mPlaceName, mPlaceDescription;
-    private Button saveButton;
+    private Button mSaveButton;
+    private TextView mShowMarkerName;
     private String mType;
 
     public CreateMarker(LatLng mMarkerLatLng, MapFragment mMapFragment) {
         this.mMarkerLatLng = mMarkerLatLng;
         this.mMapFragment = mMapFragment;
-        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        mFirestoreServices = new FirestoreServices();
     }
 
-    @Nullable
+    @SuppressLint("SetTextI18n")
+    @NonNull
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_create_marker, container, false);
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View view = inflater.inflate(R.layout.fragment_create_marker, null);
 
         mPlaceName = view.findViewById(R.id.markerName);
         mPlaceDescription = view.findViewById(R.id.markerDescription);
-        Button mChurch = view.findViewById(R.id.church);
-        Button mPrehistoricSite = view.findViewById(R.id.prehistoricSite);
-        saveButton = view.findViewById(R.id.save);
+        mSaveButton = view.findViewById(R.id.save);
+        mShowMarkerName = view.findViewById(R.id.showMarkerName);
+        Button church = view.findViewById(R.id.church);
+        Button prehistoricSite = view.findViewById(R.id.prehistoricSite);
+        Button tree = view.findViewById(R.id.tree);
         Button closeButton = view.findViewById(R.id.close);
 
-        mChurch.setOnClickListener(v -> mType = "church");
-        mPrehistoricSite.setOnClickListener(v -> mType = "temple");
+        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mFirestoreServices = FirestoreServices.getInstance();
+
+        church.setOnClickListener(v -> {
+            mType = "church";
+            mShowMarkerName.setText("Church");
+        });
+        prehistoricSite.setOnClickListener(v -> {
+            mType = "temple";
+            mShowMarkerName.setText("Temple");
+        });
+        tree.setOnClickListener(v -> {
+            mType = "nature";
+            mShowMarkerName.setText("Nature");
+        });
+
         closeButton.setOnClickListener(v -> dismiss());
         configureSaveButton();
 
-        Objects.requireNonNull(Objects.requireNonNull(getDialog()).getWindow())
+        builder.setView(view);
+        AlertDialog dialog = builder.create();
+        Objects.requireNonNull(dialog.getWindow())
                 .setBackgroundDrawableResource(android.R.color.transparent);
-        return view;
+
+        return dialog;
     }
 
     private void saveMarkerToFireStore() {
@@ -80,22 +103,23 @@ public class CreateMarker extends DialogFragment {
         GeoPoint geoPoint = new GeoPoint(mMarkerLatLng.latitude, mMarkerLatLng.longitude);
         mFirestoreServices.addMarkerDb(mCurrentUser.getUid(), name, description, type, geoPoint,
                 success -> {
-                    Toast.makeText(getContext(), success, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), success,
+                            Toast.LENGTH_SHORT).show();
                     mMapFragment.refreshMapMarkers();
                     dismiss();
                 },
-                error -> Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show()
+                error -> Toast.makeText(getContext(), error,
+                        Toast.LENGTH_SHORT).show()
         );
     }
 
     private void configureSaveButton() {
-        saveButton.setOnClickListener(v -> {
+        mSaveButton.setOnClickListener(v -> {
             if (NetworkUtils.isWifiDisconnected(requireContext())) {
                 Toast.makeText(requireContext(), "Wifi Required",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
-
             saveMarkerToFireStore();
         });
     }

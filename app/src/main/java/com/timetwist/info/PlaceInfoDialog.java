@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,22 +13,36 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import com.timetwist.R;
+import com.timetwist.firebase.FirestoreServices;
+import com.timetwist.utils.NetworkUtils;
 
 import java.util.Objects;
 
 public class PlaceInfoDialog extends DialogFragment {
+    private final OnFavoriteUpdateListener updateListener;
     private final String mTitle;
     private final String mDescription;
-    private final String mMarkerType;
+    private FirestoreServices mFirestoreServices;
+    private Button mFavoriteLocation;
     private TextView mReadMore;
+    private boolean mButtonClicked;
 
-    public PlaceInfoDialog(String mTitle, String mDescription, String mMarkerType) {
+    public interface OnFavoriteUpdateListener {
+        void onFavoriteAdded(String title);
+
+        void onFavoriteRemoved(String title);
+    }
+
+    public PlaceInfoDialog(String mTitle, String mDescription, Boolean bool,
+                           OnFavoriteUpdateListener listener) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
-        this.mMarkerType = mMarkerType;
+        mButtonClicked = bool;
+        this.updateListener = listener;
     }
 
     @NonNull
@@ -36,8 +51,10 @@ public class PlaceInfoDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.fragment_place_info_dialog, null);
+        mFirestoreServices = FirestoreServices.getInstance();
 
         mReadMore = view.findViewById(R.id.readMore);
+        mFavoriteLocation = view.findViewById(R.id.favoriteLocation);
         ImageButton cancelButton = view.findViewById(R.id.cancelID);
         TextView title = view.findViewById(R.id.placeTitle);
         TextView description = view.findViewById(R.id.placeDescription);
@@ -45,32 +62,55 @@ public class PlaceInfoDialog extends DialogFragment {
 
         title.setText(mTitle);
         description.setText(mDescription);
-        configureReadMoreButton();
         cancelButton.setOnClickListener(v -> dismiss());
+        changeDrawable();
+        configureFavoriteButton();
 
         builder.setView(view);
         AlertDialog dialog = builder.create();
-        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
+        Objects.requireNonNull(dialog.getWindow())
+                .setBackgroundDrawableResource(android.R.color.transparent);
 
         return dialog;
     }
 
-    private void configureReadMoreButton() {
-        mReadMore.setOnClickListener(v -> {
-            switch (mMarkerType) {
-                case "church":
-
-                    break;
-                case "temple":
-
-                    break;
-                case "tree":
-
-                    break;
-                default:
-                    Toast.makeText(requireActivity(), "Something went Wrong", Toast.LENGTH_SHORT).show();
-                    break;
+    private void configureFavoriteButton() {
+        mFavoriteLocation.setOnClickListener(v -> {
+            if (NetworkUtils.isWifiDisconnected(requireContext())) {
+                Toast.makeText(requireContext(), "Wifi Required",
+                        Toast.LENGTH_SHORT).show();
+                return;
             }
+            mButtonClicked = !mButtonClicked;
+            changeDrawable();
+
+            if (mButtonClicked) {
+                mFirestoreServices.makeFavoriteLocation(mTitle,
+                        success -> {
+                            Toast.makeText(requireContext(), success,
+                                    Toast.LENGTH_SHORT).show();
+                            if (updateListener != null) updateListener.onFavoriteAdded(mTitle);
+                        },
+                        error -> Toast.makeText(requireContext(), error,
+                                Toast.LENGTH_SHORT).show());
+                return;
+            }
+
+            mFirestoreServices.findFavoriteMarkerAndDelete(mTitle,
+                    success -> {
+                        if (updateListener == null) return;
+                        updateListener.onFavoriteRemoved(mTitle);
+                        Toast.makeText(requireContext(), success,
+                                Toast.LENGTH_SHORT).show();
+                    },
+                    error -> Toast.makeText(requireContext(), error,
+                            Toast.LENGTH_SHORT).show());
         });
+    }
+
+    private void changeDrawable() {
+        mFavoriteLocation.setBackground(ContextCompat.getDrawable(requireContext(),
+                mButtonClicked ? R.drawable.favorite_button_clicked :
+                        R.drawable.favorite_button_not_clicked));
     }
 }

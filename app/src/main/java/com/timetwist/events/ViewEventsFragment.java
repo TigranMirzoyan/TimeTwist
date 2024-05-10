@@ -46,7 +46,7 @@ public class ViewEventsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Button refreshButton = view.findViewById(R.id.refresh);
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        mActivityUtils = new ActivityUtils();
+        mActivityUtils = ActivityUtils.getInstance();
 
         //mMyEvents = view.findViewById(R.id.myEvents);
         mBack = view.findViewById(R.id.closeFragment);

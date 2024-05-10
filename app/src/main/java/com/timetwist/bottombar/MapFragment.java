@@ -31,7 +31,8 @@ public class MapFragment extends Fragment {
     private MapUIManager mMapUIManager;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_map, container, false);
     }
 
@@ -47,7 +48,8 @@ public class MapFragment extends Fragment {
 
     private void onMapReady(GoogleMap map) {
         mMap = map;
-        MapHelper.initializePlaces(requireActivity().getApplicationContext(), getString(R.string.my_map_Api_key));
+        MapHelper.initializePlaces(requireActivity().getApplicationContext(),
+                getString(R.string.my_map_Api_key));
         MapHelper.enableMyLocationIfPermitted(mMap, requireContext());
         mMapUIManager = new MapUIManager(requireContext(), this,
                 requireView(), mMyLocationButton, mMap, mFusedLocationClient);
@@ -57,7 +59,8 @@ public class MapFragment extends Fragment {
     }
 
     private void configureFusedLocationClient() {
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        mFusedLocationClient = LocationServices
+                .getFusedLocationProviderClient(requireActivity());
         ((SupportMapFragment) Objects.requireNonNull(getChildFragmentManager()
                 .findFragmentById(R.id.map))).getMapAsync(this::onMapReady);
     }

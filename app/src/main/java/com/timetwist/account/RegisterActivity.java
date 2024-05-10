@@ -31,8 +31,10 @@ public class RegisterActivity extends AppCompatActivity {
         mRegister = findViewById(R.id.registerButton);
         mLoginRegister = new FirebaseLoginRegister(this);
 
-        mSwitchToLogin.setOnClickListener(v -> ActivityUtils.changeToLoginActivity(this));
-        mClose.setOnClickListener(v -> ActivityUtils.changeToMainActivity(this));
+        mSwitchToLogin.setOnClickListener(v -> ActivityUtils
+                .changeToLoginActivity(this));
+        mClose.setOnClickListener(v -> ActivityUtils
+                .changeToMainActivity(this));
         configureRegisterBtn();
     }
 

@@ -9,19 +9,37 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.timetwist.custom.consumers.QuadConsumer;
+import com.google.firebase.firestore.SetOptions;
+import com.timetwist.custom.consumers.QuintConsumer;
 import com.timetwist.custom.consumers.TriConsumer;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class FirestoreServices {
-    private final FirebaseFirestore mDb = FirebaseFirestore.getInstance();
+    private static FirestoreServices mInstance;
+    private final FirebaseFirestore mDb;
+    private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-    public void createUserInDB(final String username, final String email, final String password, FirebaseUser currentUser) {
+    private FirestoreServices() {
+        mDb = FirebaseFirestore.getInstance();
+    }
+
+    public static synchronized FirestoreServices getInstance() {
+        if (mInstance == null) {
+            mInstance = new FirestoreServices();
+        }
+        return mInstance;
+    }
+
+    public void createUserInDB(final String username, final String email,
+                               final String password, FirebaseUser currentUser) {
         String userId = currentUser.getUid();
         Map<String, Object> user = new HashMap<>();
         user.put("username", username);
@@ -32,15 +50,15 @@ public class FirestoreServices {
     }
 
     public void updateProfileUI(BiConsumer<String, String> callback) {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
+        if (mAuth.getCurrentUser() == null) {
             return;
         }
-        String userId = currentUser.getUid();
+        String userId = mAuth.getCurrentUser().getUid();
 
         mDb.collection("Users").document(userId).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful() || task.getResult() == null) {
-                Log.d("FirebaseService", "get failed with ", task.getException());
+                Log.d("FirebaseService", "get failed with ",
+                        task.getException());
                 return;
             }
 
@@ -57,10 +75,12 @@ public class FirestoreServices {
         });
     }
 
-    public void getGlobalMarkers(TriConsumer<LatLng, String, String> callback, Consumer<String> errorHandler) {
+    public void getGlobalMarkers(TriConsumer<LatLng, String,
+            String> callback, Consumer<String> errorHandler) {
         mDb.collection("Locations").get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
-                errorHandler.accept("Error getting documents: " + Objects.requireNonNull(task.getException()).getMessage());
+                errorHandler.accept("Error getting documents: " +
+                        Objects.requireNonNull(task.getException()).getMessage());
                 return;
             }
 
@@ -80,45 +100,128 @@ public class FirestoreServices {
         });
     }
 
-    public void getUserCustomMarkers(QuadConsumer<LatLng, String, String, String> callback, Consumer<String> errorHandler) {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
+    public void getUserCustomMarkers(QuintConsumer<LatLng, String, String, String, String>
+                                             callback, Consumer<String> errorHandler) {
+        if (mAuth.getCurrentUser() == null) {
             errorHandler.accept("No authenticated user found.");
             return;
         }
 
-        String userId = currentUser.getUid();
-        mDb.collection("Users").document(userId).collection("Markers").get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                errorHandler.accept("Error getting user-specific documents: " + Objects.requireNonNull(task.getException()).getMessage());
-                return;
-            }
+        mDb.collection("Users").document(mAuth.getCurrentUser().getUid())
+                .collection("Markers")
+                .get().addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        errorHandler.accept("Error getting user-specific documents: " +
+                                Objects.requireNonNull(task.getException()).getMessage());
+                        return;
+                    }
 
-            for (QueryDocumentSnapshot document : task.getResult()) {
-                GeoPoint geoPoint = document.getGeoPoint("coordinates");
-                String name = document.getString("name");
-                String type = document.getString("type");
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        GeoPoint geoPoint = document.getGeoPoint("coordinates");
+                        String name = document.getString("name");
+                        String description = document.getString("description");
+                        String type = document.getString("type");
 
-                if (geoPoint == null || name == null || type == null) {
-                    errorHandler.accept("Document data is incomplete: " + document.getId());
-                    return;
-                }
+                        if (geoPoint == null || name == null || type == null) {
+                            errorHandler.accept("Document data is incomplete: "
+                                    + document.getId());
+                            return;
+                        }
 
-                LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
-                callback.accept(latLng, name, type, document.getId());
-            }
-        });
+                        LatLng latLng = new LatLng(geoPoint.getLatitude(),
+                                geoPoint.getLongitude());
+                        callback.accept(latLng, name, description, type, document.getId());
+                    }
+                });
     }
 
-    public void addMarkerDb(String uid, String name, String description, String type,
-                            GeoPoint coordinates, Consumer<String> onSuccess, Consumer<String> onFailure) {
+    public void getFavoritePlaces(Consumer<List<String>> onSuccess, Consumer<String> onFailure) {
+        if (mAuth.getCurrentUser() == null) {
+            onFailure.accept("No authenticated user found.");
+            return;
+        }
+
+        mDb.collection("Users").document(mAuth.getCurrentUser().getUid())
+                .collection("FavoriteMarkers").document("GlobalMarkers")
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        onFailure.accept("No favorites document found");
+                        return;
+                    }
+                    Map<String, Object> fields = documentSnapshot.getData();
+                    if (fields == null) {
+                        onSuccess.accept(new ArrayList<>());
+                        return;
+                    }
+                    List<String> favorites = new ArrayList<>();
+                    fields.forEach((key, value) -> {
+                        if (Boolean.TRUE.equals(value)) {
+                            favorites.add(key);
+                        }
+                    });
+                    onSuccess.accept(favorites);
+                })
+                .addOnFailureListener(e -> onFailure
+                        .accept("Failed to fetch favorites: " + e.getMessage()));
+    }
+
+    public void makeFavoriteLocation(String title, Consumer<String> onSuccess,
+                                     Consumer<String> onFailure) {
+        if (mAuth.getCurrentUser() == null) {
+            onFailure.accept("No authenticated user found.");
+            return;
+        }
+
+        mDb.collection("Users").document(mAuth.getCurrentUser().getUid())
+                .collection("FavoriteMarkers").document("GlobalMarkers")
+                .set(Collections.singletonMap(title, true), SetOptions.merge())
+                .addOnSuccessListener(command -> onSuccess
+                        .accept("Marker set as favorite!"))
+                .addOnFailureListener(e -> onFailure
+                        .accept("Failed to set marker as favorite: " + e.getMessage()));
+    }
+
+    public void findFavoriteMarkerAndDelete(String title, Consumer<String> onSuccess,
+                                            Consumer<String> onFailure) {
+        if (mAuth.getCurrentUser() == null) {
+            onFailure.accept("No authenticated user found.");
+            return;
+        }
+
+        mDb.collection("Users").document(mAuth.getCurrentUser().getUid())
+                .collection("FavoriteMarkers").document("GlobalMarkers")
+                .update(title, false)
+                .addOnSuccessListener(command -> onSuccess
+                        .accept("Marker was successfully deleted from Favorites!"))
+                .addOnFailureListener(e -> onFailure
+                        .accept("Failed to set marker as not favorite: " + e.getMessage()));
+    }
+
+    public void addMarkerDb(String uid, String name, String description,
+                            String type, GeoPoint coordinates,
+                            Consumer<String> onSuccess, Consumer<String> onFailure) {
         Map<String, Object> markerData = new HashMap<>();
         markerData.put("name", name);
         markerData.put("description", description);
         markerData.put("coordinates", coordinates);
         markerData.put("type", type);
-        mDb.collection("Users").document(uid).collection("Markers").add(markerData)
-                .addOnSuccessListener(documentReference -> onSuccess.accept("Marker saved!"))
-                .addOnFailureListener(e -> onFailure.accept("Failed to save marker."));
+        mDb.collection("Users").document(uid)
+                .collection("Markers").add(markerData)
+                .addOnSuccessListener(command -> onSuccess
+                        .accept("Marker saved!"))
+                .addOnFailureListener(e -> onFailure
+                        .accept("Failed to save marker."));
+    }
+
+    public void deleteCustomMarker(String markerId, Consumer<String> onSuccess,
+                                   Consumer<String> onFailure) {
+        FirebaseFirestore.getInstance().collection("Users")
+                .document(Objects.requireNonNull(mAuth.getCurrentUser()).getUid())
+                .collection("Markers").document(markerId).delete()
+                .addOnSuccessListener(command -> onSuccess
+                        .accept("Marker was successfully deleted!"))
+                .addOnFailureListener(e -> onFailure
+                        .accept("Error deleting marker"));
     }
 }

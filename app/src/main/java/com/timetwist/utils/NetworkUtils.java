@@ -8,7 +8,8 @@ import android.net.NetworkCapabilities;
 public class NetworkUtils {
 
     public static boolean isWifiDisconnected(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager == null) {
             return true;
         }
@@ -19,6 +20,7 @@ public class NetworkUtils {
         }
 
         NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
-        return capabilities == null || !capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+        return capabilities == null || !capabilities
+                .hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
     }
 }
