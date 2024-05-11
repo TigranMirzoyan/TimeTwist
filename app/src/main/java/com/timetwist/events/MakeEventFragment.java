@@ -134,7 +134,7 @@ public class MakeEventFragment extends Fragment {
             String peopleStr = mNumberOfPeople.getText().toString().trim();
             int people = peopleStr.isEmpty() ? 0 : Integer.parseInt(peopleStr);
 
-            if (!mGlobalMarkerNames.contains(name) && !TextUtils.isEmpty(name) &&
+            if (mGlobalMarkerNames.contains(name) && !TextUtils.isEmpty(name) &&
                     !TextUtils.isEmpty(dataTime) && description.length() <= 50
                     && people >= 0 && people <= 50) {
                 sendEventToFirebase(name, description, people);
