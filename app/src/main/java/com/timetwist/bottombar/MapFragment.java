@@ -17,6 +17,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Marker;
+import com.timetwist.MainActivity;
 import com.timetwist.R;
 import com.timetwist.ui.manager.MapHelper;
 import com.timetwist.ui.manager.MapUIManager;
@@ -29,6 +30,8 @@ public class MapFragment extends Fragment {
     private Button mMyLocationButton, mAddMarkerButton;
     private TextView mChangeMarkers;
     private MapUIManager mMapUIManager;
+    private String pendingMarkerName;
+    private boolean mIsMapReady = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -56,6 +59,12 @@ public class MapFragment extends Fragment {
         mMapUIManager.configureMap(mAddMarkerButton, mChangeMarkers);
         mMapUIManager.configureCompassPlace();
         mMapUIManager.configureAutocomplete(getChildFragmentManager());
+        mIsMapReady = true;
+
+        if (pendingMarkerName != null) {
+            zoomToFavoriteMarker(pendingMarkerName);
+            pendingMarkerName = null;
+        }
     }
 
     private void configureFusedLocationClient() {
@@ -71,14 +80,30 @@ public class MapFragment extends Fragment {
             return;
         }
 
-        mMapUIManager.startMarkerDownloadingProcess();
         mMapUIManager.mCustomMarkers.forEach(Marker::remove);
         mMapUIManager.mCustomMarkers.clear();
         mMapUIManager.addMarkersFromFirebase();
-        mMapUIManager.finishMarkerDownloadingProcess();
     }
 
-    public void cancelDialog() {
+    public void prepareZoomToFavoriteMarker(String markerName) {
+        if (mIsMapReady) {
+            zoomToFavoriteMarker(markerName);
+            return;
+        }
+        pendingMarkerName = markerName;
+    }
+
+    public void zoomToFavoriteMarker(String name) {
+        if (mMapUIManager == null) {
+            Log.e("MapFragment", "MapUIManager is not initialized.");
+            return;
+        }
+        ((MainActivity) requireActivity()).getBottomBar().selectTabById(R.id.map, true);
+        mMapUIManager.zoomToMarkerByName(name);
+    }
+
+    public void cancelDialogAndMapClickListener() {
         mMapUIManager.cancelDialog();
+        mMapUIManager.cancelMapClickListener();
     }
 }

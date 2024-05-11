@@ -10,8 +10,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
-import com.timetwist.custom.consumers.QuintConsumer;
-import com.timetwist.custom.consumers.TriConsumer;
+import com.timetwist.custom.interfaces.QuintConsumer;
+import com.timetwist.custom.interfaces.TriConsumer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -160,6 +160,8 @@ public class FirestoreServices {
                             favorites.add(key);
                         }
                     });
+
+                    favorites.sort(String.CASE_INSENSITIVE_ORDER);
                     onSuccess.accept(favorites);
                 })
                 .addOnFailureListener(e -> onFailure

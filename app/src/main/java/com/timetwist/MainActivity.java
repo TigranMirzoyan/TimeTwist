@@ -5,6 +5,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.timetwist.custom.interfaces.OnMarkerSelectedListener;
 import com.timetwist.utils.ActivityUtils;
 import com.timetwist.utils.NetworkUtils;
 
@@ -12,7 +13,7 @@ import java.util.Objects;
 
 import nl.joery.animatedbottombar.AnimatedBottomBar;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnMarkerSelectedListener {
     private ActivityUtils mActivityUtils;
     private AnimatedBottomBar mBottomBar;
     private boolean mIsMapInitialized = false;
@@ -25,8 +26,6 @@ public class MainActivity extends AppCompatActivity {
         mActivityUtils = ActivityUtils.getInstance();
         mActivityUtils.replace(getSupportFragmentManager(), mActivityUtils.HOME_FRAGMENT);
         mActivityUtils.chooseFragment(getSupportFragmentManager(), mBottomBar, getIntent());
-        mActivityUtils.initializeFragments(getSupportFragmentManager());
-
         setupBottomBarItemSelection();
     }
 
@@ -41,14 +40,25 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
 
-            if (R.id.map == tabId) {
-                mIsMapInitialized = true;
-            }
-            if (R.id.map == Objects.requireNonNull(lastTab).getId()) {
-                mActivityUtils.MAP_FRAGMENT.cancelDialog();
-            }
+            if (R.id.map == tabId) mIsMapInitialized = true;
+            if (R.id.map == Objects.requireNonNull(lastTab).getId())
+                mActivityUtils.MAP_FRAGMENT.cancelDialogAndMapClickListener();
             mActivityUtils.selectFragment(getSupportFragmentManager(), tabId);
             return true;
         });
+    }
+
+    public AnimatedBottomBar getBottomBar() {
+        return mBottomBar;
+    }
+
+    public void onMarkerSelected(String markerName) {
+        if (NetworkUtils.isWifiDisconnected(this)) {
+            Toast.makeText(this, "Please turn on Wifi", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        mBottomBar.selectTabById(R.id.map, true);
+        mActivityUtils.MAP_FRAGMENT.prepareZoomToFavoriteMarker(markerName);
     }
 }

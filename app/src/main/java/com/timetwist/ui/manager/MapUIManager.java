@@ -89,9 +89,7 @@ public class MapUIManager {
 
     public void configureMap(Button mAddMarkerButton, TextView mChangeMarkers) {
         mMap.setOnCameraMoveStartedListener(reason -> {
-            if (reason != GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
-                return;
-            }
+            if (reason != GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) return;
             this.mIsAtCurrentLocation = false;
             updateMyLocationButtonDrawable();
         });
@@ -182,9 +180,7 @@ public class MapUIManager {
     public void configureCompassPlace() {
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         View compass = mRootView.findViewById(COMPASS_ID);
-        if (compass == null) {
-            return;
-        }
+        if (compass == null) return;
         View locationCompass = ((View) compass.getParent()).findViewById(LOCATION_COMPASS_ID);
         RelativeLayout.LayoutParams layoutParams =
                 (RelativeLayout.LayoutParams) locationCompass.getLayoutParams();
@@ -197,9 +193,7 @@ public class MapUIManager {
 
     @SuppressLint("MissingPermission")
     public void updateLocation(Runnable ifLocationIsNull) {
-        if (!MapHelper.hasLocationPermissions(mContext)) {
-            return;
-        }
+        if (!MapHelper.hasLocationPermissions(mContext)) return;
         mFusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
             if (location == null) {
                 ifLocationIsNull.run();
@@ -213,9 +207,7 @@ public class MapUIManager {
     }
 
     public void updateMyLocationButtonDrawable() {
-        if (mContext == null) {
-            return;
-        }
+        if (mContext == null) return;
         mMyLocationButton.setBackground(ContextCompat.getDrawable(mContext,
                 mIsAtCurrentLocation ? R.drawable.my_location_visible :
                         R.drawable.my_location_not_visible));
@@ -236,9 +228,7 @@ public class MapUIManager {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
                 LatLng latLng = place.getLatLng();
-                if (latLng == null || mMap == null) {
-                    return;
-                }
+                if (latLng == null || mMap == null) return;
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, LAT_LNG_ZOOM));
             }
 
@@ -250,10 +240,12 @@ public class MapUIManager {
     }
 
     public void addMarkersFromFirebase() {
-        startMarkerDownloadingProcess();
+        showProgressBar();
+        disableFragmentInteraction();
         addGlobalMarkers();
         addCustomMarkers();
-        finishMarkerDownloadingProcess();
+        hideProgressBar();
+        enableFragmentInteraction();
     }
 
     private void addGlobalMarkers() {
@@ -265,9 +257,7 @@ public class MapUIManager {
                         .icon(getBitmapDescriptorFromVectorDrawable(mContext,
                                 R.drawable.class.getField(type).getInt(null))));
                 marker.setTag("firebase");
-                if (mIsButtonClicked) {
-                    marker.setVisible(false);
-                }
+                if (mIsButtonClicked) marker.setVisible(false);
                 mGlobalMarkers.add(marker);
             } catch (IllegalAccessException | NoSuchFieldException e) {
                 throw new RuntimeException(e);
@@ -292,9 +282,7 @@ public class MapUIManager {
                         .snippet(description)
                         .icon(getBitmapDescriptorFromVectorDrawable(mContext,
                                 R.drawable.class.getField(type).getInt(null))));
-                if (!mIsButtonClicked) {
-                    marker.setVisible(false);
-                }
+                if (!mIsButtonClicked) marker.setVisible(false);
                 marker.setTag(documentId);
                 mCustomMarkers.add(marker);
             } catch (IllegalAccessException | NoSuchFieldException e) {
@@ -334,7 +322,7 @@ public class MapUIManager {
                         return;
                     }
                     PlaceInfoDialog dialogFragment =
-                            new PlaceInfoDialog(title, result, maybeLocation.isPresent(),
+                            new PlaceInfoDialog(title, result, maybeLocation.isPresent(), mContext,
                                     new PlaceInfoDialog.OnFavoriteUpdateListener() {
                                         @Override
                                         public void onFavoriteAdded(String title) {
@@ -374,22 +362,17 @@ public class MapUIManager {
     }
 
     public void cancelDialog() {
-        if (mArticle != null) {
-            mArticle.cancel(true);
-            mArticle = null;
+        if (mArticle == null) {
+            hideProgressBar();
+            enableFragmentInteraction();
+            return;
         }
-        hideProgressBar();
-        enableFragmentInteraction();
+        mArticle.cancel(true);
+        mArticle = null;
     }
 
-    public void startMarkerDownloadingProcess() {
-        showProgressBar();
-        disableFragmentInteraction();
-    }
-
-    public void finishMarkerDownloadingProcess() {
-        hideProgressBar();
-        enableFragmentInteraction();
+    public void cancelMapClickListener(){
+        mMap.setOnMapClickListener(null);
     }
 
     private void disableFragmentInteraction() {
@@ -407,20 +390,23 @@ public class MapUIManager {
     }
 
     private void showProgressBar() {
-        new Handler(Looper.getMainLooper()).post(() -> mProgressBar.setVisibility(View.VISIBLE));
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (mProgressBar != null) mProgressBar.setVisibility(View.VISIBLE);
+        });
     }
 
     private void hideProgressBar() {
-        new Handler(Looper.getMainLooper()).post(() -> mProgressBar.setVisibility(View.GONE));
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (mProgressBar != null) mProgressBar.setVisibility(View.GONE);
+        });
     }
+
 
     private void dismissExistingDialogIfExists() {
         FragmentManager fragmentManager = mFragment.getChildFragmentManager();
         Fragment existingDialog = fragmentManager.findFragmentByTag("PlaceInfoDialog");
         Fragment existingDialog2 = fragmentManager.findFragmentByTag("PlaceInfoDialog2");
-        if (existingDialog == null || existingDialog2 == null) {
-            return;
-        }
+        if (existingDialog == null || existingDialog2 == null) return;
         fragmentManager.beginTransaction().remove(existingDialog).commit();
     }
 
@@ -434,5 +420,31 @@ public class MapUIManager {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    public void zoomToMarkerByName(String markerName) {
+        showProgressBar();
+        disableFragmentInteraction();
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            String searchName = markerName.toLowerCase();
+
+            Optional<Marker> theMarker = mGlobalMarkers
+                    .stream()
+                    .filter(marker -> marker.getTitle().toLowerCase().equals(searchName))
+                    .findFirst();
+
+            theMarker.ifPresent(marker -> {
+                LatLng markerPosition = marker.getPosition();
+                mMap.animateCamera(CameraUpdateFactory
+                        .newLatLngZoom(markerPosition, LAT_LNG_ZOOM));
+            });
+
+            if (!theMarker.isPresent()) {
+                Toast.makeText(mContext, markerName + " marker not found",
+                        Toast.LENGTH_LONG).show();
+            }
+            hideProgressBar();
+            enableFragmentInteraction();
+        }, 1000);
     }
 }

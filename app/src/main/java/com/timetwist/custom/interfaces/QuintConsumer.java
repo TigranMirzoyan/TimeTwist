@@ -1,4 +1,4 @@
-package com.timetwist.custom.consumers;
+package com.timetwist.custom.interfaces;
 
 @FunctionalInterface
 public interface QuintConsumer<T, U, V, W, X> {

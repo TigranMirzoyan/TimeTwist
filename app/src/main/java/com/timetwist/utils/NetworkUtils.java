@@ -10,14 +10,10 @@ public class NetworkUtils {
     public static boolean isWifiDisconnected(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager == null) {
-            return true;
-        }
+        if (connectivityManager == null) return true;
 
         Network network = connectivityManager.getActiveNetwork();
-        if (network == null) {
-            return true;
-        }
+        if (network == null) return true;
 
         NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
         return capabilities == null || !capabilities

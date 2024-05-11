@@ -14,7 +14,7 @@ import com.timetwist.R;
 import com.timetwist.account.LoginActivity;
 import com.timetwist.account.LoginRegisterFragment;
 import com.timetwist.account.RegisterActivity;
-import com.timetwist.bottombar.FavoriteLocationsFragment;
+import com.timetwist.favorite.locations.FavoriteLocationsFragment;
 import com.timetwist.bottombar.HomeFragment;
 import com.timetwist.bottombar.MapFragment;
 import com.timetwist.bottombar.ProfileFragment;
@@ -50,13 +50,6 @@ public class ActivityUtils {
         context.startActivity(new Intent(context, LoginActivity.class));
     }
 
-    public void initializeFragments(FragmentManager fragmentManager) {
-        if (fragmentManager == null) return;
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.frameLayout, PROFILE_FRAGMENT).hide(PROFILE_FRAGMENT);
-        transaction.add(R.id.frameLayout, FAVORITE_LOCATIONS_FRAGMENT).hide(FAVORITE_LOCATIONS_FRAGMENT);
-        transaction.commit();
-    }
 
     public static void changeToMainActivity(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
@@ -74,7 +67,7 @@ public class ActivityUtils {
         if (!mCurrentFragment.isAdded()) transaction.add(R.id.frameLayout, mCurrentFragment);
 
         transaction.show(mCurrentFragment);
-        transaction.commit();
+        transaction.commitNow();
     }
 
 
@@ -83,7 +76,6 @@ public class ActivityUtils {
 
         if (tabId == R.id.home) {
             selectedFragment = HOME_FRAGMENT;
-            Log.w("ActivityUtils", "HomeFragment " + tabId);
         } else if (tabId == R.id.profile) {
             if (FirebaseAuth.getInstance().getCurrentUser() == null) {
                 selectedFragment = LOGIN_REGISTER_FRAGMENT;

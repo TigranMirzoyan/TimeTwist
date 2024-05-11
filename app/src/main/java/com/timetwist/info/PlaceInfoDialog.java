@@ -1,6 +1,7 @@
 package com.timetwist.info;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import java.util.Objects;
 
 public class PlaceInfoDialog extends DialogFragment {
     private final OnFavoriteUpdateListener updateListener;
+    private final Context mContext;
     private final String mTitle;
     private final String mDescription;
     private FirestoreServices mFirestoreServices;
@@ -37,12 +39,13 @@ public class PlaceInfoDialog extends DialogFragment {
         void onFavoriteRemoved(String title);
     }
 
-    public PlaceInfoDialog(String mTitle, String mDescription, Boolean bool,
-                           OnFavoriteUpdateListener listener) {
+    public PlaceInfoDialog(String mTitle, String mDescription, Boolean bool, Context mContext,
+                           OnFavoriteUpdateListener updateListener) {
+        this.mContext = mContext;
         this.mTitle = mTitle;
         this.mDescription = mDescription;
+        this.updateListener = updateListener;
         mButtonClicked = bool;
-        this.updateListener = listener;
     }
 
     @NonNull
@@ -76,8 +79,8 @@ public class PlaceInfoDialog extends DialogFragment {
 
     private void configureFavoriteButton() {
         mFavoriteLocation.setOnClickListener(v -> {
-            if (NetworkUtils.isWifiDisconnected(requireContext())) {
-                Toast.makeText(requireContext(), "Wifi Required",
+            if (NetworkUtils.isWifiDisconnected(mContext)) {
+                Toast.makeText(mContext, "Wifi Required",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -87,11 +90,11 @@ public class PlaceInfoDialog extends DialogFragment {
             if (mButtonClicked) {
                 mFirestoreServices.makeFavoriteLocation(mTitle,
                         success -> {
-                            Toast.makeText(requireContext(), success,
+                            Toast.makeText(mContext, success,
                                     Toast.LENGTH_SHORT).show();
                             if (updateListener != null) updateListener.onFavoriteAdded(mTitle);
                         },
-                        error -> Toast.makeText(requireContext(), error,
+                        error -> Toast.makeText(mContext, error,
                                 Toast.LENGTH_SHORT).show());
                 return;
             }
@@ -100,16 +103,16 @@ public class PlaceInfoDialog extends DialogFragment {
                     success -> {
                         if (updateListener == null) return;
                         updateListener.onFavoriteRemoved(mTitle);
-                        Toast.makeText(requireContext(), success,
+                        Toast.makeText(mContext, success,
                                 Toast.LENGTH_SHORT).show();
                     },
-                    error -> Toast.makeText(requireContext(), error,
+                    error -> Toast.makeText(mContext, error,
                             Toast.LENGTH_SHORT).show());
         });
     }
 
     private void changeDrawable() {
-        mFavoriteLocation.setBackground(ContextCompat.getDrawable(requireContext(),
+        mFavoriteLocation.setBackground(ContextCompat.getDrawable(mContext,
                 mButtonClicked ? R.drawable.favorite_button_clicked :
                         R.drawable.favorite_button_not_clicked));
     }
