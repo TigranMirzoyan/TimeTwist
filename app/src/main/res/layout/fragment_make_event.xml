@@ -34,9 +34,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            android:text="Fill in \nthe information."
+            android:text="Fill in \ninformation."
             android:textColor="@color/marian_blue"
-            android:textSize="40sp"
+            android:textSize="35sp"
             android:textStyle="bold" />
 
         <ScrollView
@@ -58,23 +58,21 @@
                     android:layout_marginHorizontal="32dp"
                     android:layout_marginTop="32dp"
                     android:layout_marginBottom="8dp"
-                    android:text="Name"
+                    android:text="Place Name"
                     android:textColor="@color/amaranth_purple" />
 
-                <EditText
+                <AutoCompleteTextView
                     android:id="@+id/eventName"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginHorizontal="32dp"
                     android:background="@drawable/background_red"
-                    android:ems="10"
                     android:hint="Enter here"
-                    android:inputType="textEmailAddress"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
+                    android:inputType="text"
+                    android:paddingHorizontal="16dp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white"
-                    android:textSize="16dp" />
+                    android:textSize="16sp" />
 
 
                 <TextView
@@ -92,8 +90,32 @@
                     android:layout_height="50dp"
                     android:layout_marginHorizontal="32dp"
                     android:background="@drawable/background_blue"
-                    android:hint="Click here"
+                    android:hint="Choose Time"
                     android:padding="14dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Number Of Walking Companions"
+                    android:textColor="@color/marian_blue" />
+
+                <EditText
+                    android:id="@+id/numberOfPeople"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginHorizontal="32dp"
+                    android:background="@drawable/background_blue"
+                    android:ems="10"
+                    android:hint="Enter here"
+                    android:inputType="number"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white"
                     android:textSize="16sp" />
@@ -110,27 +132,26 @@
                 <EditText
                     android:id="@+id/eventDescription"
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
+                    android:layout_height="192dp"
                     android:layout_marginHorizontal="32dp"
                     android:background="@drawable/background_red"
                     android:ems="10"
                     android:gravity="top|start"
                     android:hint="Enter here"
                     android:inputType="textMultiLine"
-                    android:paddingStart="16dp"
+                    android:paddingHorizontal="16dp"
                     android:paddingTop="16dp"
-                    android:paddingEnd="16dp"
                     android:scrollbars="vertical"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white"
-                    android:textSize="16dp" />
+                    android:textSize="16sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="32dp"
                     android:layout_marginTop="16dp"
-                    android:layout_marginBottom="32dp"
+                    android:layout_marginBottom="16dp"
                     android:gravity="center"
                     android:orientation="horizontal">
 

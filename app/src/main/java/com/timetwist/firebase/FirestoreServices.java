@@ -12,20 +12,23 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.timetwist.custom.interfaces.QuintConsumer;
 import com.timetwist.custom.interfaces.TriConsumer;
+import com.timetwist.events.Event;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class FirestoreServices {
     private static FirestoreServices mInstance;
     private final FirebaseFirestore mDb;
-    private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private final FirebaseUser mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
     private FirestoreServices() {
         mDb = FirebaseFirestore.getInstance();
@@ -50,10 +53,10 @@ public class FirestoreServices {
     }
 
     public void updateProfileUI(BiConsumer<String, String> callback) {
-        if (mAuth.getCurrentUser() == null) {
+        if (mCurrentUser == null) {
             return;
         }
-        String userId = mAuth.getCurrentUser().getUid();
+        String userId = mCurrentUser.getUid();
 
         mDb.collection("Users").document(userId).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful() || task.getResult() == null) {
@@ -77,37 +80,38 @@ public class FirestoreServices {
 
     public void getGlobalMarkers(TriConsumer<LatLng, String,
             String> callback, Consumer<String> errorHandler) {
-        mDb.collection("Locations").get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                errorHandler.accept("Error getting documents: " +
-                        Objects.requireNonNull(task.getException()).getMessage());
-                return;
-            }
+        mDb.collection("Locations").get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        errorHandler.accept("Error getting documents: " +
+                                Objects.requireNonNull(task.getException()).getMessage());
+                        return;
+                    }
 
-            for (QueryDocumentSnapshot document : task.getResult()) {
-                GeoPoint geoPoint = document.getGeoPoint("coordinates");
-                String name = document.getString("name");
-                String type = document.getString("type");
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        GeoPoint geoPoint = document.getGeoPoint("coordinates");
+                        String name = document.getString("name");
+                        String type = document.getString("type");
 
-                if (geoPoint == null || name == null || type == null) {
-                    errorHandler.accept("Document data is incomplete: " + document.getId());
-                    return;
-                }
+                        if (geoPoint == null || name == null || type == null) {
+                            errorHandler.accept("Document data is incomplete: " + document.getId());
+                            return;
+                        }
 
-                LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
-                callback.accept(latLng, name, type);
-            }
-        });
+                        LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
+                        callback.accept(latLng, name, type);
+                    }
+                });
     }
 
     public void getUserCustomMarkers(QuintConsumer<LatLng, String, String, String, String>
                                              callback, Consumer<String> errorHandler) {
-        if (mAuth.getCurrentUser() == null) {
+        if (mCurrentUser == null) {
             errorHandler.accept("No authenticated user found.");
             return;
         }
 
-        mDb.collection("Users").document(mAuth.getCurrentUser().getUid())
+        mDb.collection("Users").document(mCurrentUser.getUid())
                 .collection("Markers")
                 .get().addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
@@ -135,13 +139,32 @@ public class FirestoreServices {
                 });
     }
 
+    public void getGlobalMarkerNames(Consumer<List<String>> onSuccess, Consumer<String> onFailure) {
+        mDb.collection("Locations").get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        List<String> names = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String name = document.getString("name");
+                            if (name != null) {
+                                names.add(name);
+                            }
+                        }
+                        onSuccess.accept(names);
+                    } else {
+                        onFailure.accept("Failed to fetch marker names: " + Objects.requireNonNull(task.getException()).getMessage());
+                    }
+                });
+    }
+
+
     public void getFavoritePlaces(Consumer<List<String>> onSuccess, Consumer<String> onFailure) {
-        if (mAuth.getCurrentUser() == null) {
+        if (mCurrentUser == null) {
             onFailure.accept("No authenticated user found.");
             return;
         }
 
-        mDb.collection("Users").document(mAuth.getCurrentUser().getUid())
+        mDb.collection("Users").document(mCurrentUser.getUid())
                 .collection("FavoriteMarkers").document("GlobalMarkers")
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -170,12 +193,12 @@ public class FirestoreServices {
 
     public void makeFavoriteLocation(String title, Consumer<String> onSuccess,
                                      Consumer<String> onFailure) {
-        if (mAuth.getCurrentUser() == null) {
+        if (mCurrentUser == null) {
             onFailure.accept("No authenticated user found.");
             return;
         }
 
-        mDb.collection("Users").document(mAuth.getCurrentUser().getUid())
+        mDb.collection("Users").document(mCurrentUser.getUid())
                 .collection("FavoriteMarkers").document("GlobalMarkers")
                 .set(Collections.singletonMap(title, true), SetOptions.merge())
                 .addOnSuccessListener(command -> onSuccess
@@ -186,12 +209,12 @@ public class FirestoreServices {
 
     public void findFavoriteMarkerAndDelete(String title, Consumer<String> onSuccess,
                                             Consumer<String> onFailure) {
-        if (mAuth.getCurrentUser() == null) {
+        if (mCurrentUser == null) {
             onFailure.accept("No authenticated user found.");
             return;
         }
 
-        mDb.collection("Users").document(mAuth.getCurrentUser().getUid())
+        mDb.collection("Users").document(mCurrentUser.getUid())
                 .collection("FavoriteMarkers").document("GlobalMarkers")
                 .update(title, false)
                 .addOnSuccessListener(command -> onSuccess
@@ -218,12 +241,74 @@ public class FirestoreServices {
 
     public void deleteCustomMarker(String markerId, Consumer<String> onSuccess,
                                    Consumer<String> onFailure) {
+        if (mCurrentUser == null) {
+            onFailure.accept("Pls turn on wifi");
+            return;
+        }
+
         FirebaseFirestore.getInstance().collection("Users")
-                .document(Objects.requireNonNull(mAuth.getCurrentUser()).getUid())
+                .document(mCurrentUser.getUid())
                 .collection("Markers").document(markerId).delete()
                 .addOnSuccessListener(command -> onSuccess
                         .accept("Marker was successfully deleted!"))
                 .addOnFailureListener(e -> onFailure
                         .accept("Error deleting marker"));
+    }
+
+    public void makeEvent(String name, String username, String description, Calendar calendar,
+                          int number, Consumer<String> onSuccess,
+                          Consumer<String> onFailure) {
+        if (mCurrentUser == null) {
+            onFailure.accept("User is not authenticated");
+            return;
+        }
+
+        com.google.firebase.Timestamp timestamp = new com.google.firebase.Timestamp(calendar.getTime());
+        Map<String, Object> event = new HashMap<>();
+        event.put("name", name);
+        event.put("username", username);
+        event.put("description", description);
+        event.put("dateTime", timestamp);
+        event.put("AEmail", mCurrentUser.getEmail());
+        event.put("numberOfPeople", number);
+
+        mDb.collection("Events")
+                .get()
+                .addOnSuccessListener(command -> mDb.collection("Events")
+                        .add(event)
+                        .addOnSuccessListener(documentReference ->
+                                onSuccess.accept("Event created successfully!"))
+                        .addOnFailureListener(e ->
+                                onFailure.accept("Failed to create event")))
+                .addOnFailureListener(e ->
+                        onFailure.accept("Failed to find user by email"));
+
+    }
+
+    public void getRandomEvents(BiConsumer<List<Event>, List<Event>> callback, Consumer<String> errorHandler) {
+        mDb.collection("Events").get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        errorHandler.accept("Error getting Events documents: " +
+                                Objects.requireNonNull(task.getException()).getMessage());
+                        return;
+                    }
+                    List<Event> eventList = new ArrayList<>();
+                    List<Event> randomEventList = new ArrayList<>();
+
+                    task.getResult().forEach(document -> {
+                        Event event = document.toObject(Event.class);
+                        eventList.add(event);
+                    });
+                    int eventListSize = eventList.size();
+
+                    while (randomEventList.size() < Math.min(eventListSize, 10)) {
+                        Event randomEvent = eventList.get(new Random().nextInt(eventListSize));
+                        if (!randomEventList.contains(randomEvent)) {
+                            randomEventList.add(randomEvent);
+                        }
+                    }
+                    callback.accept(eventList, randomEventList);
+                });
     }
 }

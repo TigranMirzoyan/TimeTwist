@@ -1,6 +1,8 @@
 package com.timetwist.firebase;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,7 +40,9 @@ public class FirebaseLoginRegister {
 
             Toast.makeText(mContext, "Logged in Successfully",
                     Toast.LENGTH_SHORT).show();
-            ActivityUtils.changeToMainActivity(mContext);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> ActivityUtils
+                    .configureLoginRegisterToMainActivity(mContext), 1000);
+
         });
     }
 
@@ -63,7 +67,8 @@ public class FirebaseLoginRegister {
                                 "Please verify your Email", Toast.LENGTH_SHORT).show();
                         mFirestoreServices.createUserInDB(username, email,
                                 password, mAuth.getCurrentUser());
-                        ActivityUtils.changeToMainActivity(mContext);
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> ActivityUtils
+                                .configureLoginRegisterToMainActivity(mContext), 1000);
                     });
         });
     }

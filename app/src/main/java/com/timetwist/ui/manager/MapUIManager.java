@@ -44,6 +44,7 @@ import com.timetwist.info.PlaceInfoDialog;
 import com.timetwist.info.PlaceInfoDialog2;
 import com.timetwist.utils.ActivityUtils;
 import com.timetwist.utils.NetworkUtils;
+import com.timetwist.utils.WikipediaAPI;
 
 import java.util.Arrays;
 import java.util.LinkedList;

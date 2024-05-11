@@ -7,6 +7,8 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -18,29 +20,28 @@ import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.timetwist.utils.ActivityUtils;
 import com.timetwist.MainActivity;
 import com.timetwist.R;
+import com.timetwist.firebase.FirestoreServices;
+import com.timetwist.utils.ActivityUtils;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 
 public class MakeEventFragment extends Fragment {
+    private final List<String> mGlobalMarkerNames = new ArrayList<>();
     private final Calendar mCalendar = Calendar.getInstance();
     private ActivityUtils mActivityUtils;
+    private AutoCompleteTextView mEventName;
     private TextView mDataTime;
-    private EditText mEventDescription, mEventName;
+    private EditText mEventDescription, mNumberOfPeople;
     private Button mMakeEvent, mBack;
-    private FirebaseFirestore mFirestore;
+    private FirestoreServices mFirestoreServices;
     private FirebaseUser mCurrentUser;
-
-    public MakeEventFragment() {
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,9 +51,8 @@ public class MakeEventFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mFirestore = FirebaseFirestore.getInstance();
+        mFirestoreServices = FirestoreServices.getInstance();
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-
         mActivityUtils = ActivityUtils.getInstance();
 
         mBack = view.findViewById(R.id.closeFragment);
@@ -60,10 +60,26 @@ public class MakeEventFragment extends Fragment {
         mMakeEvent = view.findViewById(R.id.makeEventButton);
         mEventName = view.findViewById(R.id.eventName);
         mEventDescription = view.findViewById(R.id.eventDescription);
+        mNumberOfPeople = view.findViewById(R.id.numberOfPeople);
         mDataTime.setOnClickListener(v -> showDatePicker());
+        mEventName.setOnClickListener(v -> mEventName.showDropDown());
 
+        loadGlobalMarkerNames();
         configureMakeEventButton();
         configureBackButton();
+    }
+
+    private void configureBackButton() {
+        mBack.setOnClickListener(v -> {
+            if (mCurrentUser == null) {
+                return;
+            }
+            if (!(requireActivity() instanceof MainActivity)) {
+                return;
+            }
+            mActivityUtils.replace(requireActivity().getSupportFragmentManager(),
+                    mActivityUtils.HOME_FRAGMENT, requireContext());
+        });
     }
 
     private void showDatePicker() {
@@ -81,12 +97,33 @@ public class MakeEventFragment extends Fragment {
             mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
             mCalendar.set(Calendar.MINUTE, minute);
             updateLabel();
-        }, mCalendar.get(Calendar.HOUR_OF_DAY), mCalendar.get(Calendar.MINUTE), false).show();
+        }, mCalendar.get(Calendar.HOUR_OF_DAY), mCalendar.get(Calendar.MINUTE),
+                false).show();
     }
 
     private void updateLabel() {
-        SimpleDateFormat format = new SimpleDateFormat("EEE, MMM d, yyyy 'at' h:mm a", Locale.getDefault());
+        SimpleDateFormat format = new SimpleDateFormat
+                ("EEE, MMM d, yyyy 'at' h:mm a", Locale.getDefault());
         mDataTime.setText(format.format(mCalendar.getTime()));
+    }
+
+    private void loadGlobalMarkerNames() {
+        FirestoreServices.getInstance().getGlobalMarkerNames(
+                names -> {
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                            android.R.layout.simple_dropdown_item_1line, names);
+                    adapter.sort(String.CASE_INSENSITIVE_ORDER);
+                    mEventName.setAdapter(adapter);
+                    mGlobalMarkerNames.clear();
+                    mGlobalMarkerNames.addAll(names);
+                    if (names.isEmpty()) {
+                        Toast.makeText(requireContext(), "No names available",
+                                Toast.LENGTH_LONG).show();
+                    }
+                },
+                error -> Toast.makeText(requireContext(), "Error loading event names: " + error,
+                        Toast.LENGTH_SHORT).show()
+        );
     }
 
     private void configureMakeEventButton() {
@@ -94,72 +131,45 @@ public class MakeEventFragment extends Fragment {
             String name = mEventName.getText().toString().trim();
             String dataTime = mDataTime.getText().toString().trim();
             String description = mEventDescription.getText().toString().trim();
+            String peopleStr = mNumberOfPeople.getText().toString().trim();
+            int people = peopleStr.isEmpty() ? 0 : Integer.parseInt(peopleStr);
 
-            if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(dataTime)
-                    && description.length() <= 50) {
-                if (mCurrentUser != null) {
-                    sendToFirebase(name, description);
-                }
-            } else {
-                if (TextUtils.isEmpty(name)) {
-                    mEventName.setError("Name is required");
-                }
-                if (TextUtils.isEmpty(mDataTime.getText().toString())) {
-                    Toast.makeText(getContext(), "Please add the time",
-                            Toast.LENGTH_SHORT).show();
-                }
-                if (description.length() >= 50) {
-                    mEventDescription.setError("Too big description (>50)");
-                }
+            if (!mGlobalMarkerNames.contains(name) && !TextUtils.isEmpty(name) &&
+                    !TextUtils.isEmpty(dataTime) && description.length() <= 50
+                    && people >= 0 && people <= 50) {
+                sendEventToFirebase(name, description, people);
+                return;
             }
+
+            if (!mGlobalMarkerNames.contains(name))
+                mEventName.setError("Name must match one of the global marker names");
+
+            if (TextUtils.isEmpty(mDataTime.getText().toString()))
+                Toast.makeText(getContext(), "Please add the time",
+                        Toast.LENGTH_SHORT).show();
+
+            if (description.length() >= 50)
+                mEventDescription.setError("Max size of letters should be 50");
+
+            if (description.isEmpty()) mEventDescription.setError("Description cannot be empty");
+
+            if (people > 50)
+                mNumberOfPeople.setError("Impossible to get " + people + "companions with you");
+
         });
     }
 
-    private void configureBackButton() {
-        mBack.setOnClickListener(v -> {
-            if (mCurrentUser != null) {
-                if (requireActivity() instanceof MainActivity) {
-                    mActivityUtils.replace(requireActivity()
-                            .getSupportFragmentManager(), mActivityUtils.HOME_FRAGMENT);
-                }
-            }
-        });
-    }
-
-    private void sendToFirebase(String name, String description) {
-        if (mCurrentUser == null || TextUtils.isEmpty(mCurrentUser.getEmail())) {
-            Toast.makeText(getContext(),
-                    "User is not authenticated", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        com.google.firebase.Timestamp timestamp = new com.google.firebase.Timestamp(mCalendar.getTime());
-
-        Map<String, Object> event = new HashMap<>();
-        event.put("name", name);
-        if (!TextUtils.isEmpty(description)) {
-            event.put("description", description);
-        }
-        event.put("dateTime", timestamp);
-        event.put("AEmail",mCurrentUser.getEmail());
-
-        mFirestore.collection("Events")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> mFirestore.collection("Events")
-                        .add(event)
-                        .addOnSuccessListener(documentReference ->
-                                Toast.makeText(getContext(),
-                                        "Event created successfully!", Toast.LENGTH_SHORT).show())
-                        .addOnFailureListener(e ->
-                                Toast.makeText(getContext(),
-                                        "Failed to create event", Toast.LENGTH_SHORT).show()))
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(),
-                                "Failed to find user by email", Toast.LENGTH_SHORT).show());
+    private void sendEventToFirebase(String name, String description, int people) {
+        mFirestoreServices.makeEvent(name, mActivityUtils.PROFILE_FRAGMENT
+                        .getUsername(), description, mCalendar, people,
+                success -> Toast.makeText(requireContext(), success,
+                        Toast.LENGTH_SHORT).show(),
+                error -> Toast.makeText(getContext(), error,
+                        Toast.LENGTH_SHORT).show());
 
         mEventName.getText().clear();
         mEventDescription.getText().clear();
         mDataTime.setText("");
+        mNumberOfPeople.setText("");
     }
 }
-

@@ -22,6 +22,7 @@ public class ProfileFragment extends Fragment {
     private ActivityUtils mActivityUtils;
     private Button mLogOut, mFavoritePlaces;
     private TextView mUsernameTextView, mEmailTextView;
+    private String mUsername;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -44,6 +45,7 @@ public class ProfileFragment extends Fragment {
         configureFavoritePlacesButton();
         mFirestoreServices.updateProfileUI((username, email) -> {
             if (isAdded()) {
+                mUsername = username;
                 mUsernameTextView.setText(username);
                 mEmailTextView.setText(email);
             }
@@ -67,7 +69,11 @@ public class ProfileFragment extends Fragment {
                 return;
             }
             mActivityUtils.replace(requireActivity().getSupportFragmentManager(),
-                    mActivityUtils.FAVORITE_LOCATIONS_FRAGMENT);
+                    mActivityUtils.FAVORITE_LOCATIONS_FRAGMENT, requireContext());
         });
+    }
+
+    public String getUsername(){
+        return mUsername;
     }
 }

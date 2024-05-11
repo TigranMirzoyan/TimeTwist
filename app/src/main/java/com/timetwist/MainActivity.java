@@ -24,8 +24,11 @@ public class MainActivity extends AppCompatActivity implements OnMarkerSelectedL
         setContentView(R.layout.activity_main);
         mBottomBar = findViewById(R.id.bottomBar);
         mActivityUtils = ActivityUtils.getInstance();
-        mActivityUtils.replace(getSupportFragmentManager(), mActivityUtils.HOME_FRAGMENT);
-        mActivityUtils.chooseFragment(getSupportFragmentManager(), mBottomBar, getIntent());
+        mActivityUtils.replace(getSupportFragmentManager(),
+                mActivityUtils.HOME_FRAGMENT, this);
+        mActivityUtils.chooseFragment(getSupportFragmentManager(), mBottomBar,
+                getIntent(), this);
+        mIsMapInitialized = mActivityUtils.initialiseFragments(getSupportFragmentManager(), this);
         setupBottomBarItemSelection();
     }
 
@@ -43,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements OnMarkerSelectedL
             if (R.id.map == tabId) mIsMapInitialized = true;
             if (R.id.map == Objects.requireNonNull(lastTab).getId())
                 mActivityUtils.MAP_FRAGMENT.cancelDialogAndMapClickListener();
-            mActivityUtils.selectFragment(getSupportFragmentManager(), tabId);
+            mActivityUtils.selectFragment(getSupportFragmentManager(), tabId, this);
             return true;
         });
     }

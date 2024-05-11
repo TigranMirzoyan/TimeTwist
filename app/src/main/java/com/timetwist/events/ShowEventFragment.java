@@ -12,8 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.timetwist.R;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class ShowEventFragment extends RecyclerView.Adapter<ShowEventFragment.MyViewHolder> {
     private final List<Event> mEventList;
@@ -38,8 +39,9 @@ public class ShowEventFragment extends RecyclerView.Adapter<ShowEventFragment.My
         holder.mTitle.setText(event.getName());
         holder.mUsername.setText(event.getUsername());
         holder.mDescription.setText(event.getDescription());
+        holder.mNumberOfPeople.setText("Number of companions " + event.getNumberOfPeople());
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
         holder.mDateTime.setText(dateFormat.format(event.getDateTime()));
     }
 
@@ -49,7 +51,7 @@ public class ShowEventFragment extends RecyclerView.Adapter<ShowEventFragment.My
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
-        TextView mTitle, mUsername, mDescription, mDateTime;
+        TextView mTitle, mUsername, mDescription, mDateTime,mNumberOfPeople;
         Button mJoinEvent;
 
         public MyViewHolder(@NonNull View itemView) {
@@ -57,8 +59,9 @@ public class ShowEventFragment extends RecyclerView.Adapter<ShowEventFragment.My
             mTitle = itemView.findViewById(R.id.title);
             mUsername = itemView.findViewById(R.id.userName);
             mDescription = itemView.findViewById(R.id.description);
-            mJoinEvent = itemView.findViewById(R.id.makeEventButton);
             mDateTime = itemView.findViewById(R.id.timeOfEvent);
+            mNumberOfPeople = itemView.findViewById(R.id.numberOfPeople);
+            mJoinEvent = itemView.findViewById(R.id.makeEventButton);
         }
     }
 }

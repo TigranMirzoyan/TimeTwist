@@ -1,8 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginHorizontal="32dp"
     tools:context=".events.ShowEventFragment">
 
@@ -10,8 +10,8 @@
         android:id="@+id/card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="32dp"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="32dp">
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -36,6 +36,19 @@
                 android:layout_below="@+id/title"
                 android:layout_marginTop="8dp"
                 android:text=""
+                android:padding="5dp"
+                android:textColor="@color/marian_blue"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/numberOfPeople"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/userName"
+                android:layout_marginTop="8dp"
+                android:text=""
+                android:padding="5dp"
                 android:textColor="@color/marian_blue"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -44,7 +57,7 @@
                 android:id="@+id/linear"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/userName"
+                android:layout_below="@id/numberOfPeople"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/background_red"
                 android:paddingHorizontal="8dp">
@@ -54,7 +67,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="16dp"
-                    android:paddingHorizontal="5dp"
+                    android:padding="5dp"
                     android:text=""
                     android:textColor="@color/white"
                     android:textSize="15sp"
@@ -70,7 +83,8 @@
                 android:background="@drawable/background_blue"
                 android:paddingHorizontal="8dp"
                 android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:padding="5dp"/>
 
             <Button
                 android:id="@+id/makeEventButton"
