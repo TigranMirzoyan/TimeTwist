@@ -63,13 +63,12 @@ public class ProfileFragment extends Fragment {
 
     private void configureFavoritePlacesButton() {
         mFavoritePlaces.setOnClickListener(v -> {
-            if (NetworkUtils.isWifiDisconnected(requireContext())) {
+            if (NetworkUtils.isInternetDisconnected(requireContext())) {
                 Toast.makeText(requireContext(), "Wifi Required",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
-            mActivityUtils.replace(requireActivity().getSupportFragmentManager(),
-                    mActivityUtils.FAVORITE_LOCATIONS_FRAGMENT, requireContext());
+            mActivityUtils.replace(mActivityUtils.FAVORITE_LOCATIONS_FRAGMENT, requireContext());
         });
     }
 

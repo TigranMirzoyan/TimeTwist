@@ -79,7 +79,7 @@ public class PlaceInfoDialog extends DialogFragment {
 
     private void configureFavoriteButton() {
         mFavoriteLocation.setOnClickListener(v -> {
-            if (NetworkUtils.isWifiDisconnected(mContext)) {
+            if (NetworkUtils.isInternetDisconnected(mContext)) {
                 Toast.makeText(mContext, "Wifi Required",
                         Toast.LENGTH_SHORT).show();
                 return;

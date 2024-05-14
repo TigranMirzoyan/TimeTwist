@@ -18,7 +18,7 @@ import com.timetwist.R;
 
 public class HomeFragment extends Fragment {
     private ActivityUtils mActivityUtils;
-    private Button mMakeEvent, viewEvents;
+    private Button mMakeEvent, mViewEvents,mAddMarker;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -30,7 +30,8 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mMakeEvent = view.findViewById(R.id.makeEvent);
-        viewEvents = view.findViewById(R.id.viewEvents);
+        mViewEvents = view.findViewById(R.id.viewEvents);
+        mAddMarker = view.findViewById(R.id.addMarkerWithKey);
         mActivityUtils = ActivityUtils.getInstance();
 
         configureMakeEventButton();
@@ -43,17 +44,26 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireActivity(), "User isn't authorized", Toast.LENGTH_SHORT).show();
                 return;
             }
-            mActivityUtils.replace(requireActivity().getSupportFragmentManager(), mActivityUtils.MAKE_EVENT_FRAGMENT,requireContext());
+            mActivityUtils.replace(mActivityUtils.MAKE_EVENT_FRAGMENT,requireContext());
         });
     }
 
     private void configureViewEventsButton() {
-        viewEvents.setOnClickListener(v -> {
+        mViewEvents.setOnClickListener(v -> {
             if (FirebaseAuth.getInstance().getCurrentUser() == null || !(requireActivity() instanceof MainActivity)) {
                 Toast.makeText(requireActivity(), "User isn't authorized", Toast.LENGTH_SHORT).show();
                 return;
             }
-            mActivityUtils.replace(requireActivity().getSupportFragmentManager(), mActivityUtils.VIEW_EVENTS_FRAGMENT,requireContext());
+            mActivityUtils.replace(mActivityUtils.VIEW_EVENTS_FRAGMENT,requireContext());
+        });
+    }
+
+    private void configureAddMarkerButton(){
+        mAddMarker.setOnClickListener(v -> {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null || !(requireActivity() instanceof MainActivity)) {
+                Toast.makeText(requireActivity(), "User isn't authorized", Toast.LENGTH_SHORT).show();
+                return;
+            }
         });
     }
 }

@@ -91,8 +91,7 @@ public class ViewEventsFragment extends Fragment {
         mBack.setOnClickListener(v -> {
             if (mCurrentUser != null) {
                 if (requireActivity() instanceof MainActivity) {
-                    mActivityUtils.replace(requireActivity().getSupportFragmentManager(),
-                            mActivityUtils.HOME_FRAGMENT, requireContext());
+                    mActivityUtils.replace(mActivityUtils.HOME_FRAGMENT, requireContext());
                 }
             }
         });

@@ -62,12 +62,30 @@
             android:textColor="@color/white"
             android:textSize="20sp" />
 
-        <Button
-            android:id="@+id/deleteBtn"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="20dp"
-            android:background="@drawable/delete_btn"
-            android:paddingTop="12dp" />
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/deleteBtn"
+                style="@android:style/Widget.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/delete_btn" />
+
+            <Button
+                android:id="@+id/shareBtn"
+                style="@android:style/Widget.Button"
+                android:layout_marginStart="10dp"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/share_btn"/>
+        </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

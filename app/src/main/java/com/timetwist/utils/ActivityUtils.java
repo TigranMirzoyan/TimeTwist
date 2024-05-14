@@ -34,6 +34,7 @@ public class ActivityUtils {
     public final MakeEventFragment MAKE_EVENT_FRAGMENT = new MakeEventFragment();
     public final ViewEventsFragment VIEW_EVENTS_FRAGMENT = new ViewEventsFragment();
     public final FavoriteLocationsFragment FAVORITE_LOCATIONS_FRAGMENT = new FavoriteLocationsFragment();
+    public FragmentManager mFragmentManager;
     private Fragment mCurrentFragment;
 
     public static synchronized ActivityUtils getInstance() {
@@ -56,14 +57,15 @@ public class ActivityUtils {
         intent.putExtra("OpenProfileFragment", true);
         context.startActivity(intent);
     }
+
     public static void configureLoginRegisterToMainActivity(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         context.startActivity(intent);
     }
 
-    public boolean initialiseFragments(FragmentManager fragmentManager, Context context) {
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        if (NetworkUtils.isWifiDisconnected(context)) return false;
+    public boolean initialiseFragments(Context context) {
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        if (NetworkUtils.isInternetDisconnected(context)) return false;
         if (FirebaseAuth.getInstance().getCurrentUser() == null) return false;
 
         transaction.add(R.id.frameLayout, MAKE_EVENT_FRAGMENT)
@@ -78,12 +80,12 @@ public class ActivityUtils {
         return true;
     }
 
-    public void replace(FragmentManager fragmentManager, Fragment newFragment, Context context) {
+    public void replace(Fragment newFragment, Context context) {
         View view = ((Activity) context).getCurrentFocus();
         if (view != null) KeyboardUtils.hideKeyboardFrom(context, view);
-        if (fragmentManager == null) return;
+        if (mFragmentManager == null) return;
 
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
         if (mCurrentFragment != null) transaction.hide(mCurrentFragment);
 
         mCurrentFragment = newFragment;
@@ -94,7 +96,7 @@ public class ActivityUtils {
     }
 
 
-    public void selectFragment(FragmentManager fragmentManager, int tabId, Context context) {
+    public void selectFragment(int tabId, Context context) {
         Fragment selectedFragment = null;
 
         if (tabId == R.id.home) {
@@ -102,7 +104,7 @@ public class ActivityUtils {
         } else if (tabId == R.id.profile) {
             if (FirebaseAuth.getInstance().getCurrentUser() == null) {
                 selectedFragment = LOGIN_REGISTER_FRAGMENT;
-                replace(fragmentManager, selectedFragment, context);
+                replace(selectedFragment, context);
                 return;
             }
             selectedFragment = PROFILE_FRAGMENT;
@@ -112,17 +114,20 @@ public class ActivityUtils {
         }
         if (selectedFragment == null) return;
 
-        replace(fragmentManager, selectedFragment, context);
+        replace(selectedFragment, context);
     }
 
-    public void chooseFragment(FragmentManager fragmentManager,
-                               AnimatedBottomBar bottomBar, Intent intent, Context context) {
+    public void chooseFragment(AnimatedBottomBar bottomBar, Intent intent, Context context) {
         if (!intent.getBooleanExtra("OpenProfileFragment", false)) return;
 
         Fragment selectedFragment = FirebaseAuth.getInstance().getCurrentUser() == null ?
                 LOGIN_REGISTER_FRAGMENT : PROFILE_FRAGMENT;
 
-        replace(fragmentManager, selectedFragment, context);
+        replace(selectedFragment, context);
         bottomBar.selectTabById(R.id.profile, false);
+    }
+
+    public void getFragmentManager(FragmentManager fragmentManager) {
+        mFragmentManager = fragmentManager;
     }
 }

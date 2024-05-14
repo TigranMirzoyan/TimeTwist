@@ -36,9 +36,9 @@ public class CreateMarker extends DialogFragment {
     private TextView mShowMarkerName;
     private String mType;
 
-    public CreateMarker(LatLng mMarkerLatLng, MapFragment mMapFragment) {
-        this.mMarkerLatLng = mMarkerLatLng;
-        this.mMapFragment = mMapFragment;
+    public CreateMarker(LatLng markerLatLng, MapFragment mapFragment) {
+        mMarkerLatLng = markerLatLng;
+        mMapFragment = mapFragment;
     }
 
     @SuppressLint("SetTextI18n")
@@ -89,6 +89,11 @@ public class CreateMarker extends DialogFragment {
         String name = mPlaceName.getText().toString().trim();
         String description = mPlaceDescription.getText().toString().trim();
         String type = mType;
+        if (mMapFragment.checkIfMarkerExist(name)) {
+            Toast.makeText(getContext(), "You have already marker with this name",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (name.isEmpty() || mMarkerLatLng == null) {
             Toast.makeText(getContext(), "Marker name is required",
@@ -105,7 +110,7 @@ public class CreateMarker extends DialogFragment {
                 success -> {
                     Toast.makeText(getContext(), success,
                             Toast.LENGTH_SHORT).show();
-                    mMapFragment.refreshMapMarkers();
+                    mMapFragment.refreshMapMarkers(true, name);
                     dismiss();
                 },
                 error -> Toast.makeText(getContext(), error,
@@ -115,7 +120,7 @@ public class CreateMarker extends DialogFragment {
 
     private void configureSaveButton() {
         mSaveButton.setOnClickListener(v -> {
-            if (NetworkUtils.isWifiDisconnected(requireContext())) {
+            if (NetworkUtils.isInternetDisconnected(requireContext())) {
                 Toast.makeText(requireContext(), "Wifi Required",
                         Toast.LENGTH_SHORT).show();
                 return;

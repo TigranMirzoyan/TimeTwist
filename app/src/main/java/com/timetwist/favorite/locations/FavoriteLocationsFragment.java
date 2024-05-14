@@ -112,7 +112,7 @@ public class FavoriteLocationsFragment extends Fragment {
         if (mFavoriteMarkers.remove(title)) filter(mSearchView.getQuery().toString());
     }
 
-    public List<String> getList() {
+    public List<String> getFavoriteLocationsList() {
         return mFavoriteMarkers;
     }
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true"
+    android:layout_marginHorizontal="10dp"
+    android:background="@drawable/info_background"
+    android:orientation="vertical">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="16dp"
+        android:background="@drawable/background_red">
+
+        <TextView
+            android:id="@+id/placeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:text=""
+            android:textColor="@color/white"
+            android:textIsSelectable="true"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+    </HorizontalScrollView>
+</LinearLayout>

@@ -77,8 +77,7 @@ public class MakeEventFragment extends Fragment {
             if (!(requireActivity() instanceof MainActivity)) {
                 return;
             }
-            mActivityUtils.replace(requireActivity().getSupportFragmentManager(),
-                    mActivityUtils.HOME_FRAGMENT, requireContext());
+            mActivityUtils.replace(mActivityUtils.HOME_FRAGMENT, requireContext());
         });
     }
 

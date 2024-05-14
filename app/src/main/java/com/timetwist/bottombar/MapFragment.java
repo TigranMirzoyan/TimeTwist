@@ -16,7 +16,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Marker;
 import com.timetwist.MainActivity;
 import com.timetwist.R;
 import com.timetwist.ui.manager.MapHelper;
@@ -55,8 +54,8 @@ public class MapFragment extends Fragment {
                 getString(R.string.my_map_Api_key));
         MapHelper.enableMyLocationIfPermitted(mMap, requireContext());
         mMapUIManager = new MapUIManager(requireContext(), this,
-                requireView(), mMyLocationButton, mMap, mFusedLocationClient);
-        mMapUIManager.configureMap(mAddMarkerButton, mChangeMarkers);
+                requireView(), mMyLocationButton, mChangeMarkers, mMap, mFusedLocationClient);
+        mMapUIManager.configureMap(mAddMarkerButton);
         mMapUIManager.configureCompassPlace();
         mMapUIManager.configureAutocomplete(getChildFragmentManager());
         mIsMapReady = true;
@@ -74,15 +73,25 @@ public class MapFragment extends Fragment {
                 .findFragmentById(R.id.map))).getMapAsync(this::onMapReady);
     }
 
-    public void refreshMapMarkers() {
+    public void refreshMapMarkers(Boolean deleteOrAdd, String name) {
         if (mMap == null) {
             Log.e("MapUIManager", "Cannot refresh markers ");
             return;
         }
 
-        mMapUIManager.mCustomMarkers.forEach(Marker::remove);
-        mMapUIManager.mCustomMarkers.clear();
-        mMapUIManager.addMarkersFromFirebase();
+        if (!deleteOrAdd) {
+            mMapUIManager.getCustomMarkers().stream().filter(marker -> marker.getTitle()
+                    .equals(name)).findAny().ifPresent(marker -> {
+                marker.remove();
+                mMapUIManager.getCustomMarkers().remove(marker);
+            });
+            return;
+        }
+        mMapUIManager.addCustomMarkers();
+    }
+    public boolean checkIfMarkerExist(String name){
+        return mMapUIManager.getCustomMarkers().stream().anyMatch(marker -> marker.getTitle()
+                .equals(name));
     }
 
     public void prepareZoomToFavoriteMarker(String markerName) {
@@ -100,6 +109,7 @@ public class MapFragment extends Fragment {
         }
         ((MainActivity) requireActivity()).getBottomBar().selectTabById(R.id.map, true);
         mMapUIManager.zoomToMarkerByName(name);
+
     }
 
     public void cancelDialogAndMapClickListener() {
