@@ -8,7 +8,7 @@ material = "1.12.0"
 activity = "1.9.0"
 constraintlayout = "2.1.4"
 firebaseAuth = "23.0.0"
-viewmodelKtx = "2.7.0"
+viewmodelKtx = "2.8.0"
 playServicesLocation = "21.2.0"
 places = "3.4.0"
 firebaseFirestore = "25.0.0"
@@ -17,6 +17,7 @@ firebaseStorage = "21.0.0"
 bottomBar = "1.1.0"
 gson = "2.10.1"
 lottie = "6.4.0"
+retrofit = "2.9.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -37,11 +38,14 @@ firebase-storage = { group = "com.google.firebase", name = "firebase-storage", v
 bottom-bar = { module = "nl.joery.animatedbottombar:library", version.ref = "bottomBar" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 lottie-files = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie"}
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-gson-converter = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 
 [bundles]
 androidx = ["appcompat", "material", "activity", "constraintlayout", "viewmodel-ktx"]
 firebase = ["firebase-auth", "firebase-firestore", "firebase-database", "firebase-storage"]
 google = ["play-services-location", "places"]
+network = ["retrofit", "retrofit-gson-converter", "gson"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

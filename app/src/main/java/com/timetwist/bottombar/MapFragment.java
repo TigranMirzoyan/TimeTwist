@@ -5,8 +5,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,82 +18,86 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.firebase.firestore.GeoPoint;
 import com.timetwist.MainActivity;
 import com.timetwist.R;
+import com.timetwist.databinding.FragmentMapBinding;
 import com.timetwist.ui.manager.MapHelper;
 import com.timetwist.ui.manager.MapUIManager;
 
-import java.util.Objects;
-
 public class MapFragment extends Fragment {
-    private GoogleMap mMap;
+    private FragmentMapBinding mBinding;
     private FusedLocationProviderClient mFusedLocationClient;
-    private Button mMyLocationButton, mAddMarkerButton;
-    private TextView mChangeMarkers;
+    private GoogleMap mMap;
     private MapUIManager mMapUIManager;
-    private String pendingMarkerName;
+    private String mPendingMarkerName;
     private boolean mIsMapReady = false;
 
     @Override
-    public View onCreateView(LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_map, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        mBinding = FragmentMapBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mMyLocationButton = view.findViewById(R.id.myLocationBtn);
-        mAddMarkerButton = view.findViewById(R.id.addMarker);
-        mChangeMarkers = view.findViewById(R.id.changeMarkers);
+        initializeMap();
+    }
 
-        configureFusedLocationClient();
+    private void initializeMap() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
+                .findFragmentById(R.id.map);
+        if (mapFragment != null) mapFragment.getMapAsync(this::onMapReady);
     }
 
     private void onMapReady(GoogleMap map) {
         mMap = map;
+        initializeMapHelper();
+        setupMapUIManager();
+        mIsMapReady = true;
+
+        if (mPendingMarkerName != null) {
+            zoomToFavoriteMarker(mPendingMarkerName);
+            mPendingMarkerName = null;
+        }
+    }
+
+    private void initializeMapHelper() {
         MapHelper.initializePlaces(requireActivity().getApplicationContext(),
                 getString(R.string.my_map_Api_key));
         MapHelper.enableMyLocationIfPermitted(mMap, requireContext());
-        mMapUIManager = new MapUIManager(requireContext(), this,
-                requireView(), mMyLocationButton, mChangeMarkers, mMap, mFusedLocationClient);
-        mMapUIManager.configureMap(mAddMarkerButton);
-        mMapUIManager.configureCompassPlace();
-        mMapUIManager.configureAutocomplete(getChildFragmentManager());
-        mIsMapReady = true;
-
-        if (pendingMarkerName != null) {
-            zoomToFavoriteMarker(pendingMarkerName);
-            pendingMarkerName = null;
-        }
     }
 
-    private void configureFusedLocationClient() {
-        mFusedLocationClient = LocationServices
-                .getFusedLocationProviderClient(requireActivity());
-        ((SupportMapFragment) Objects.requireNonNull(getChildFragmentManager()
-                .findFragmentById(R.id.map))).getMapAsync(this::onMapReady);
+    private void setupMapUIManager() {
+        mMapUIManager = new MapUIManager(requireContext(), this, mBinding, mMap, mFusedLocationClient);
+        mMapUIManager.configureMap();
+        mMapUIManager.configureCompassPlace();
+        mMapUIManager.configureAutocomplete(getChildFragmentManager());
     }
 
     public void refreshMapMarkers(Boolean deleteOrAdd, String name) {
-        if (mMap == null) {
-            Log.e("MapUIManager", "Cannot refresh markers ");
-            return;
-        }
+        if (mMap == null) return;
+        if (deleteOrAdd) mMapUIManager.addCustomMarkers();
 
-        if (!deleteOrAdd) {
-            mMapUIManager.getCustomMarkers().stream().filter(marker -> marker.getTitle()
-                    .equals(name)).findAny().ifPresent(marker -> {
-                marker.remove();
-                mMapUIManager.getCustomMarkers().remove(marker);
-            });
-            return;
-        }
-        mMapUIManager.addCustomMarkers();
+        mMapUIManager.getCustomMarkers().stream().filter(marker ->
+                marker.getTitle().equals(name)).findAny().ifPresent(marker -> {
+            marker.remove();
+            mMapUIManager.getCustomMarkers().remove(marker);
+        });
     }
-    public boolean checkIfMarkerExist(String name){
-        return mMapUIManager.getCustomMarkers().stream().anyMatch(marker -> marker.getTitle()
-                .equals(name));
+
+    public boolean checkIfMarkerWithSameNameExists(String name) {
+        return mMapUIManager.getCustomMarkers().stream()
+                .anyMatch(marker -> marker.getTitle().equals(name));
+    }
+
+    public boolean checkIfMarkerWithSameLocationExists(GeoPoint geoPoint) {
+        return mMapUIManager.getCustomMarkers().stream()
+                .anyMatch(marker -> marker.getPosition().latitude == geoPoint.getLatitude() &&
+                        marker.getPosition().longitude == geoPoint.getLongitude());
     }
 
     public void prepareZoomToFavoriteMarker(String markerName) {
@@ -99,7 +105,7 @@ public class MapFragment extends Fragment {
             zoomToFavoriteMarker(markerName);
             return;
         }
-        pendingMarkerName = markerName;
+        mPendingMarkerName = markerName;
     }
 
     public void zoomToFavoriteMarker(String name) {
@@ -109,11 +115,35 @@ public class MapFragment extends Fragment {
         }
         ((MainActivity) requireActivity()).getBottomBar().selectTabById(R.id.map, true);
         mMapUIManager.zoomToMarkerByName(name);
-
     }
 
     public void cancelDialogAndMapClickListener() {
         mMapUIManager.cancelDialog();
-        mMapUIManager.cancelMapClickListener();
+        mMap.setOnMapClickListener(null);
+    }
+
+    public void configureWebView(String url) {
+        mBinding.webview.setVisibility(View.VISIBLE);
+        mBinding.webview.loadUrl(url);
+        WebSettings webSettings = mBinding.webview.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setDisplayZoomControls(false);
+
+        mBinding.webview.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                view.loadUrl(request.getUrl().toString());
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 }

@@ -20,7 +20,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginHorizontal="16dp"
         android:text="You aren't logged in!\nPlease login by clicking on the buttons."
-        android:textColor="@color/dark_blue"
+        android:textColor="@color/black"
         android:layout_centerVertical="true"
         android:textSize="42sp" />
 

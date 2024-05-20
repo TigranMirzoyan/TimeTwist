@@ -1,4 +1,4 @@
-package com.timetwist.favorite.locations;
+package com.timetwist.favoritelocations;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,18 +9,18 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.timetwist.R;
-import com.timetwist.custom.interfaces.OnMarkerSelectedListener;
+import com.timetwist.interfaces.OnMarkerSelectedListener;
 
 import java.util.List;
 
 public class FavoriteLocationsAdapter extends RecyclerView.Adapter<FavoriteLocationsAdapter.ViewHolder> {
 
     private final List<String> mFavoritePlaces;
-    private final OnMarkerSelectedListener listener;
+    private final OnMarkerSelectedListener mListener;
 
     public FavoriteLocationsAdapter(List<String> favoritePlaces, OnMarkerSelectedListener listener) {
-        this.mFavoritePlaces = favoritePlaces;
-        this.listener = listener;
+        mFavoritePlaces = favoritePlaces;
+        mListener = listener;
     }
 
     @NonNull
@@ -35,9 +35,7 @@ public class FavoriteLocationsAdapter extends RecyclerView.Adapter<FavoriteLocat
         String place = mFavoritePlaces.get(position);
         holder.textView.setText(place);
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onMarkerSelected(place);
-            }
+            if (mListener != null) mListener.onMarkerSelected(place);
         });
     }
 

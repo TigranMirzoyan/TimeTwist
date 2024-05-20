@@ -1,4 +1,4 @@
-package com.timetwist.custom.interfaces;
+package com.timetwist.interfaces;
 
 @FunctionalInterface
 public interface TriConsumer<T, U, V> {

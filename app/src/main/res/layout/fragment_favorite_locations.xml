@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/albescent_white"
-    tools:context=".favorite.locations.FavoriteLocationsFragment">
+    tools:context=".favoritelocations.FavoriteLocationsFragment">
 
     <SearchView
         android:id="@+id/searchView"

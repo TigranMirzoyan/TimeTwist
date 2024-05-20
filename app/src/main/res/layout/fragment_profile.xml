@@ -87,7 +87,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/favorite_places"
+            android:id="@+id/favoritePlaces"
             style="@android:style/Widget.Button"
             android:layout_width="match_parent"
             android:layout_height="64dp"
@@ -97,7 +97,7 @@
             android:text="Favorite places"
             android:textColor="@color/white"
             android:textSize="26sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"/>
     </LinearLayout>
 
     <Button

@@ -20,8 +20,11 @@ import com.timetwist.bottombar.HomeFragment;
 import com.timetwist.bottombar.MapFragment;
 import com.timetwist.bottombar.ProfileFragment;
 import com.timetwist.events.MakeEventFragment;
+import com.timetwist.events.NotVerifiedEventsFragment;
 import com.timetwist.events.ViewEventsFragment;
-import com.timetwist.favorite.locations.FavoriteLocationsFragment;
+import com.timetwist.favoritelocations.FavoriteLocationsFragment;
+import com.timetwist.firebase.FirestoreServices;
+import com.timetwist.info.AddMarkerWithKeyFragment;
 
 import nl.joery.animatedbottombar.AnimatedBottomBar;
 
@@ -33,7 +36,9 @@ public class ActivityUtils {
     public final LoginRegisterFragment LOGIN_REGISTER_FRAGMENT = new LoginRegisterFragment();
     public final MakeEventFragment MAKE_EVENT_FRAGMENT = new MakeEventFragment();
     public final ViewEventsFragment VIEW_EVENTS_FRAGMENT = new ViewEventsFragment();
+    public final NotVerifiedEventsFragment NOT_VERIFIED_EVENTS_FRAGMENT = new NotVerifiedEventsFragment();
     public final FavoriteLocationsFragment FAVORITE_LOCATIONS_FRAGMENT = new FavoriteLocationsFragment();
+    public final AddMarkerWithKeyFragment ADD_MARKER_WITH_KEY = new AddMarkerWithKeyFragment();
     public FragmentManager mFragmentManager;
     private Fragment mCurrentFragment;
 
@@ -68,14 +73,26 @@ public class ActivityUtils {
         if (NetworkUtils.isInternetDisconnected(context)) return false;
         if (FirebaseAuth.getInstance().getCurrentUser() == null) return false;
 
-        transaction.add(R.id.frameLayout, MAKE_EVENT_FRAGMENT)
-                .hide(MAKE_EVENT_FRAGMENT);
-        transaction.add(R.id.frameLayout, VIEW_EVENTS_FRAGMENT)
-                .hide(VIEW_EVENTS_FRAGMENT);
-        transaction.add(R.id.frameLayout, FAVORITE_LOCATIONS_FRAGMENT)
-                .hide(FAVORITE_LOCATIONS_FRAGMENT);
-        transaction.add(R.id.frameLayout, MAP_FRAGMENT)
-                .hide(MAP_FRAGMENT);
+        if (!MAKE_EVENT_FRAGMENT.isAdded()) {
+            transaction.add(R.id.frameLayout, MAKE_EVENT_FRAGMENT)
+                    .hide(MAKE_EVENT_FRAGMENT);
+        }
+        if (!VIEW_EVENTS_FRAGMENT.isAdded()) {
+            transaction.add(R.id.frameLayout, VIEW_EVENTS_FRAGMENT)
+                    .hide(VIEW_EVENTS_FRAGMENT);
+        }
+        if (!FAVORITE_LOCATIONS_FRAGMENT.isAdded()) {
+            transaction.add(R.id.frameLayout, FAVORITE_LOCATIONS_FRAGMENT)
+                    .hide(FAVORITE_LOCATIONS_FRAGMENT);
+        }
+        if (!MAP_FRAGMENT.isAdded()) {
+            transaction.add(R.id.frameLayout, MAP_FRAGMENT)
+                    .hide(MAP_FRAGMENT);
+        }
+        if (!PROFILE_FRAGMENT.isAdded()) {
+            transaction.add(R.id.frameLayout, PROFILE_FRAGMENT)
+                    .hide(PROFILE_FRAGMENT);
+        }
         transaction.commit();
         return true;
     }
@@ -89,7 +106,8 @@ public class ActivityUtils {
         if (mCurrentFragment != null) transaction.hide(mCurrentFragment);
 
         mCurrentFragment = newFragment;
-        if (!mCurrentFragment.isAdded()) transaction.add(R.id.frameLayout, mCurrentFragment);
+        if (!mCurrentFragment.isAdded())
+            transaction.add(R.id.frameLayout, mCurrentFragment);
 
         transaction.show(mCurrentFragment);
         transaction.commitNow();
@@ -119,7 +137,6 @@ public class ActivityUtils {
 
     public void chooseFragment(AnimatedBottomBar bottomBar, Intent intent, Context context) {
         if (!intent.getBooleanExtra("OpenProfileFragment", false)) return;
-
         Fragment selectedFragment = FirebaseAuth.getInstance().getCurrentUser() == null ?
                 LOGIN_REGISTER_FRAGMENT : PROFILE_FRAGMENT;
 
@@ -127,7 +144,18 @@ public class ActivityUtils {
         bottomBar.selectTabById(R.id.profile, false);
     }
 
-    public void getFragmentManager(FragmentManager fragmentManager) {
+    public void setFragmentManager(FragmentManager fragmentManager) {
         mFragmentManager = fragmentManager;
+    }
+
+    public void ifUserAdmin(Context context, Runnable ifAdmin, Runnable ifNotAdmin) {
+        FirestoreServices.getInstance().checkIfUserIsAdmin(isAdmin -> {
+            if (isAdmin) {
+                ToastUtils.show(context, "Logged as Admin");
+                ifAdmin.run();
+                return;
+            }
+            ifNotAdmin.run();
+        });
     }
 }

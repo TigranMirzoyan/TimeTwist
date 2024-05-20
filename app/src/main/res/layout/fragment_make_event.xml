@@ -30,15 +30,6 @@
         android:layout_marginHorizontal="32dp"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Fill in \ninformation."
-            android:textColor="@color/marian_blue"
-            android:textSize="35sp"
-            android:textStyle="bold" />
-
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -97,7 +88,7 @@
                     android:textSize="16sp" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="32dp"
                     android:layout_marginTop="16dp"
@@ -106,7 +97,7 @@
                     android:textColor="@color/marian_blue" />
 
                 <EditText
-                    android:id="@+id/numberOfPeople"
+                    android:id="@+id/numberOfCompanions"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginHorizontal="32dp"
@@ -114,6 +105,30 @@
                     android:ems="10"
                     android:hint="Enter here"
                     android:inputType="number"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Your Contact"
+                    android:textColor="@color/marian_blue" />
+
+                <EditText
+                    android:id="@+id/howToContact"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginHorizontal="32dp"
+                    android:background="@drawable/background_blue"
+                    android:ems="10"
+                    android:hint="Chatting App -> Username"
+                    android:inputType="text"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     android:textColor="@color/white"
@@ -132,13 +147,14 @@
                 <EditText
                     android:id="@+id/eventDescription"
                     android:layout_width="match_parent"
-                    android:layout_height="192dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginHorizontal="32dp"
                     android:background="@drawable/background_red"
                     android:ems="10"
                     android:gravity="top|start"
-                    android:hint="Enter here"
+                    android:hint="Write here "
                     android:inputType="textMultiLine"
+                    android:lines="8"
                     android:paddingHorizontal="16dp"
                     android:paddingTop="16dp"
                     android:scrollbars="vertical"

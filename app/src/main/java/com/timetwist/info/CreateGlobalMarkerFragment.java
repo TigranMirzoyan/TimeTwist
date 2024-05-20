@@ -3,8 +3,11 @@ package com.timetwist.info;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -13,26 +16,30 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.GeoPoint;
-import com.timetwist.databinding.FragmentCreateMarkerBinding;
+import com.timetwist.databinding.FragmentCreateGlobalMarkerBinding;
 import com.timetwist.firebase.FirestoreServices;
+import com.timetwist.interfaces.WikipediaInterface;
 import com.timetwist.utils.ActivityUtils;
 import com.timetwist.utils.NetworkUtils;
+import com.timetwist.utils.RetrofitClient;
 import com.timetwist.utils.ToastUtils;
 
+import java.util.List;
 import java.util.Objects;
 
-public class CreateMarker extends DialogFragment {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class CreateGlobalMarkerFragment extends DialogFragment {
     private final LatLng mMarkerLatLng;
-    private FragmentCreateMarkerBinding mBinding;
+    private FragmentCreateGlobalMarkerBinding mBinding;
     private FirestoreServices mFirestoreServices;
     private ActivityUtils mActivityUtils;
-    private FirebaseUser mCurrentUser;
     private String mType;
 
-    public CreateMarker(LatLng markerLatLng) {
+    public CreateGlobalMarkerFragment(LatLng markerLatLng) {
         mMarkerLatLng = markerLatLng;
     }
 
@@ -41,10 +48,8 @@ public class CreateMarker extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        mBinding = FragmentCreateMarkerBinding.inflate(LayoutInflater.from(requireContext()));
+        mBinding = FragmentCreateGlobalMarkerBinding.inflate(LayoutInflater.from(requireContext()));
         View view = mBinding.getRoot();
-
-        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mFirestoreServices = FirestoreServices.getInstance();
         mActivityUtils = ActivityUtils.getInstance();
 
@@ -64,12 +69,62 @@ public class CreateMarker extends DialogFragment {
         mBinding.close.setOnClickListener(v -> dismiss());
         mBinding.save.setOnClickListener(v -> handleSaveButtonClick());
 
+        setupAutocomplete();
+
         builder.setView(view);
         AlertDialog dialog = builder.create();
         Objects.requireNonNull(dialog.getWindow())
                 .setBackgroundDrawableResource(android.R.color.transparent);
 
         return dialog;
+    }
+
+    private void setupAutocomplete() {
+        mBinding.markerName.setThreshold(1);
+        mBinding.markerName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() >= 1) {
+                    fetchSuggestions(s.toString());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    private void fetchSuggestions(String query) {
+        WikipediaInterface apiService = RetrofitClient.getClient().create(WikipediaInterface.class);
+        Call<List<Object>> call = apiService.getSuggestions(query);
+
+        call.enqueue(new Callback<List<Object>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Object>> call, @NonNull Response<List<Object>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Object> responseBody = response.body();
+                    if (responseBody.size() > 1 && responseBody.get(1) instanceof List) {
+                        List<String> suggestions = (List<String>) responseBody.get(1);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                                android.R.layout.simple_dropdown_item_1line, suggestions);
+                        mBinding.markerName.setAdapter(adapter);
+                        mBinding.markerName.showDropDown();
+                    } else {
+                        ToastUtils.show(requireContext(), "Unexpected response format");
+                    }
+                } else {
+                    ToastUtils.show(requireContext(), "Failed to fetch suggestions");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Object>> call, Throwable t) {
+                ToastUtils.show(requireContext(), "Failed to fetch suggestions: " + t.getMessage());
+            }
+        });
     }
 
     private void handleSaveButtonClick() {
@@ -79,7 +134,6 @@ public class CreateMarker extends DialogFragment {
         }
 
         String name = mBinding.markerName.getText().toString().trim();
-        String description = mBinding.markerDescription.getText().toString().trim();
         String type = mType;
         boolean check = false;
 
@@ -97,7 +151,7 @@ public class CreateMarker extends DialogFragment {
         if (check) return;
 
         GeoPoint geoPoint = new GeoPoint(mMarkerLatLng.latitude, mMarkerLatLng.longitude);
-        mFirestoreServices.addMarkerDb(mCurrentUser.getUid(), name, description, type, geoPoint,
+        mFirestoreServices.addGlobalMarkerDb(name, type, geoPoint,
                 success -> {
                     Toast.makeText(requireContext(), success,
                             Toast.LENGTH_SHORT).show();

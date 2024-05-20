@@ -23,6 +23,11 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
+
+    viewBinding{
+        enable = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -33,6 +38,7 @@ dependencies {
     implementation(libs.bundles.androidx)
     implementation(libs.bundles.firebase)
     implementation(libs.bundles.google)
+    implementation(libs.bundles.network)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

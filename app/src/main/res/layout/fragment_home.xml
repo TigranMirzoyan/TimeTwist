@@ -17,82 +17,121 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/linear1"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/background_white"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="32dp"
-            android:text="Marker Features"
-            android:textColor="@color/amaranth_purple"
-            android:textSize="20sp" />
-
-        <Button
-            android:id="@+id/addMarkerWithKey"
-            style="@android:style/Widget.Button"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="32dp"
-            android:background="@drawable/background_blue"
-            android:text="Add Marker with Key"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linear1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="32dp"
-        android:background="@drawable/background_white"
-        android:gravity="center"
         android:orientation="vertical">
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/linear1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="32dp"
-            android:text="Events"
-            android:textColor="@color/amaranth_purple"
-            android:textSize="20sp" />
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/background_white"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible">
 
-        <Button
-            android:id="@+id/makeEvent"
-            style="@android:style/Widget.Button"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/background_blue"
-            android:text="Make Event"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="32dp"
+                android:text="Admin get Events"
+                android:textColor="@color/amaranth_purple"
+                android:textSize="20sp" />
 
-        <Button
-            android:id="@+id/viewEvents"
-            style="@android:style/Widget.Button"
+            <Button
+                android:id="@+id/acceptEvents"
+                style="@android:style/Widget.Button"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/background_blue"
+                android:text="Accept Events"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear2"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_below="@id/makeEvent"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="16dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/background_white"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="32dp"
+                android:text="Marker Features"
+                android:textColor="@color/amaranth_purple"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/addMarkerWithKey"
+                style="@android:style/Widget.Button"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/background_blue"
+                android:text="Add Marker with Key"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
             android:layout_marginBottom="32dp"
-            android:background="@drawable/background_red"
-            android:text="View Events"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-    </LinearLayout>
+            android:background="@drawable/background_white"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="32dp"
+                android:text="Events"
+                android:textColor="@color/amaranth_purple"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/makeEvent"
+                style="@android:style/Widget.Button"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/background_blue"
+                android:text="Make Event"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/viewEvents"
+                style="@android:style/Widget.Button"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/background_red"
+                android:text="View Events"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+        </LinearLayout>
+    </LinearLayout>
 </RelativeLayout>

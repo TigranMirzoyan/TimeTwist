@@ -74,7 +74,7 @@
         android:layout_width="128dp"
         android:layout_height="128dp"
         android:layout_centerInParent="true"
-        android:visibility="visible"/>
+        android:visibility="gone"/>
 
     <View
         android:id="@+id/overlayView"
@@ -84,5 +84,11 @@
         android:clickable="true"
         android:focusable="true"
         android:visibility="gone" />
+
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
 
 </RelativeLayout>

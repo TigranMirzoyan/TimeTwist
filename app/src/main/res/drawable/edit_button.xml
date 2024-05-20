@@ -1,0 +1,21 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/white" />
+            <corners android:radius="900dp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <stroke
+                android:width="3dp"
+                android:color="@color/marian_blue" />
+            <corners android:radius="900dp" />
+        </shape>
+    </item>
+
+    <item
+        android:drawable="@drawable/edit_button_vector"
+        android:gravity="center" />
+</layer-list>

@@ -4,75 +4,79 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.timetwist.utils.ActivityUtils;
-import com.timetwist.R;
+import com.timetwist.databinding.FragmentProfileBinding;
 import com.timetwist.firebase.FirestoreServices;
+import com.timetwist.utils.ActivityUtils;
 import com.timetwist.utils.NetworkUtils;
+import com.timetwist.utils.ToastUtils;
 
 public class ProfileFragment extends Fragment {
+    private FragmentProfileBinding mBinding;
     private ActivityUtils mActivityUtils;
-    private Button mLogOut, mFavoritePlaces;
-    private TextView mUsernameTextView, mEmailTextView;
+    private FirestoreServices mFirestoreServices;
     private String mUsername;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        mBinding = FragmentProfileBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
     }
 
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        mLogOut = view.findViewById(R.id.logOutButton);
-        mFavoritePlaces = view.findViewById(R.id.favorite_places);
-        mUsernameTextView = view.findViewById(R.id.username);
-        mEmailTextView = view.findViewById(R.id.email);
-
         mActivityUtils = ActivityUtils.getInstance();
-        FirestoreServices mFirestoreServices = FirestoreServices.getInstance();
+        mFirestoreServices = FirestoreServices.getInstance();
+        updateAdminVisibility();
 
-        configureLogOutButton();
-        configureFavoritePlacesButton();
+        mBinding.favoritePlaces.setOnClickListener(v -> handleFavoritePlacesButton());
+        mBinding.logOutButton.setOnClickListener(v -> handleLogOutButton());
+        loadProfileData();
+    }
+
+    private void loadProfileData() {
         mFirestoreServices.updateProfileUI((username, email) -> {
             if (isAdded()) {
                 mUsername = username;
-                mUsernameTextView.setText(username);
-                mEmailTextView.setText(email);
+                mBinding.username.setText(username);
+                mBinding.email.setText(email);
             }
         });
     }
 
-    private void configureLogOutButton() {
-        mLogOut.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            mUsernameTextView.setText("");
-            mEmailTextView.setText("");
-            ActivityUtils.changeToLoginActivity(requireActivity());
-        });
+    private void updateAdminVisibility() {
+        mActivityUtils.ifUserAdmin(requireContext(),
+                () -> mBinding.favoritePlaces.setVisibility(View.GONE),
+                () -> mBinding.favoritePlaces.setVisibility(View.VISIBLE));
     }
 
-    private void configureFavoritePlacesButton() {
-        mFavoritePlaces.setOnClickListener(v -> {
-            if (NetworkUtils.isInternetDisconnected(requireContext())) {
-                Toast.makeText(requireContext(), "Wifi Required",
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-            mActivityUtils.replace(mActivityUtils.FAVORITE_LOCATIONS_FRAGMENT, requireContext());
-        });
+    private void handleFavoritePlacesButton() {
+        if (NetworkUtils.isInternetDisconnected(requireContext())) {
+            ToastUtils.show(requireContext(), "Internet required");
+            return;
+        }
+        mActivityUtils.replace(mActivityUtils.FAVORITE_LOCATIONS_FRAGMENT, requireContext());
     }
 
-    public String getUsername(){
+    private void handleLogOutButton() {
+        FirebaseAuth.getInstance().signOut();
+        ActivityUtils.changeToLoginActivity(requireActivity());
+    }
+
+    public String getUsername() {
         return mUsername;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 }

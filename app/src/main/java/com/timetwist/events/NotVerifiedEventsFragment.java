@@ -2,8 +2,6 @@ package com.timetwist.events;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +12,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.timetwist.databinding.FragmentNotVerifiedEventsBinding;
 import com.timetwist.databinding.FragmentViewEventsBinding;
 import com.timetwist.firebase.FirestoreServices;
 import com.timetwist.utils.ActivityUtils;
@@ -23,18 +22,17 @@ import com.timetwist.utils.ToastUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ViewEventsFragment extends Fragment {
-    private FragmentViewEventsBinding mBinding;
+public class NotVerifiedEventsFragment extends Fragment {
+    private FragmentNotVerifiedEventsBinding mBinding;
     private final List<Event> mEventList = new ArrayList<>();
     private final List<Event> mDisplayedEvents = new ArrayList<>();
     private FirestoreServices mFirestoreServices;
-    private ShowEventFragment mAdapter;
-    private boolean mIsChangeEventsClicked = false;
+    private ShowNotVerifiedEventsFragment mAdapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        mBinding = FragmentViewEventsBinding.inflate(inflater, container, false);
+        mBinding = FragmentNotVerifiedEventsBinding.inflate(inflater, container, false);
         return mBinding.getRoot();
     }
 
@@ -47,10 +45,9 @@ public class ViewEventsFragment extends Fragment {
         mBinding.closeFragment.setOnClickListener(v ->
                 activityUtils.replace(activityUtils.HOME_FRAGMENT, requireContext()));
         mBinding.refresh.setOnClickListener(v -> configureRefreshButton());
-        mBinding.myEvents.setOnClickListener(v -> configureChangeEventsButton());
         mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        mAdapter = new ShowEventFragment(requireContext(), mDisplayedEvents, mIsChangeEventsClicked);
+        mAdapter = new ShowNotVerifiedEventsFragment(requireContext(), mDisplayedEvents);
         mBinding.recyclerView.setAdapter(mAdapter);
 
         getEvents();
@@ -58,17 +55,9 @@ public class ViewEventsFragment extends Fragment {
     }
 
     private void getEvents() {
-        mFirestoreServices.getEvents((eventList, randomEventList) -> {
+        mFirestoreServices.getNotVerifiedEvents((eventList, randomEventList) -> {
             mEventList.clear();
             mEventList.addAll(eventList);
-            filter("");
-        }, error -> ToastUtils.show(requireContext(), "Error: " + error));
-    }
-
-    private void getMyEvents() {
-        mFirestoreServices.getMyEvents(myEvents -> {
-            mEventList.clear();
-            mEventList.addAll(myEvents);
             filter("");
         }, error -> ToastUtils.show(requireContext(), "Error: " + error));
     }
@@ -108,25 +97,6 @@ public class ViewEventsFragment extends Fragment {
             return;
         }
         getEvents();
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void configureChangeEventsButton() {
-        if (NetworkUtils.isInternetDisconnected(requireContext())) {
-            ToastUtils.show(requireContext(), "Internet required");
-            return;
-        }
-
-        mIsChangeEventsClicked = !mIsChangeEventsClicked;
-        if (mIsChangeEventsClicked) {
-            getMyEvents();
-            mBinding.myEvents.setText("Global Events");
-        } else {
-            getEvents();
-            mBinding.myEvents.setText("My Events");
-        }
-        new Handler(Looper.getMainLooper()).postDelayed(() ->
-                mAdapter.updateIsChangeEventsClicked(mIsChangeEventsClicked), 100);
     }
 
     @Override

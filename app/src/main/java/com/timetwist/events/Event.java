@@ -1,28 +1,33 @@
 package com.timetwist.events;
 
+import com.google.firebase.firestore.ServerTimestamp;
+
 import java.util.Date;
 
 public class Event {
-    private final String name;
-    private final String username;
-    private final String description;
-    private final int numberOfPeople;
-    private final Date dateTime;
+    private String id;
+    private String name;
+    private String username;
+    private String description;
+    private @ServerTimestamp Date dateTime;
+    private int people;
+    private String contacts;
 
     public Event() {
-        this.name = "";
-        this.username = "";
-        this.description = "";
-        this.numberOfPeople = 0;
-        this.dateTime = new Date();
     }
 
-    public Event(String name, String username, String description, int numberOfPeople, Date dateTime) {
+    public Event(String id, String name, String username, String description, Date dateTime, int people, String contacts) {
+        this.id = id;
         this.name = name;
         this.username = username;
         this.description = description;
-        this.numberOfPeople = numberOfPeople;
         this.dateTime = dateTime;
+        this.people = people;
+        this.contacts = contacts;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {
@@ -37,11 +42,15 @@ public class Event {
         return description;
     }
 
-    public int getNumberOfPeople() {
-        return numberOfPeople;
-    }
-
     public Date getDateTime() {
         return dateTime;
+    }
+
+    public int getPeople() {
+        return people;
+    }
+
+    public String getContacts() {
+        return contacts;
     }
 }

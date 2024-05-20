@@ -3,41 +3,33 @@ package com.timetwist.events;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.timetwist.databinding.FragmentShowEventBinding;
+import com.timetwist.databinding.FragmentShowNotVerifiedEventsBinding;
 import com.timetwist.firebase.FirestoreServices;
-import com.timetwist.utils.ToastUtils;
 
 import java.text.DateFormat;
 import java.util.List;
 import java.util.Locale;
 
-public class ShowEventFragment extends RecyclerView.Adapter<ShowEventFragment.MyViewHolder> {
+public class ShowNotVerifiedEventsFragment extends
+        RecyclerView.Adapter<ShowNotVerifiedEventsFragment.MyViewHolder> {
     private final List<Event> mEventList;
     private final Context mContext;
-    private boolean mIsChangeEventsClicked;
 
-    public ShowEventFragment(Context context, List<Event> eventList, boolean isChangeEventsClicked) {
+    public ShowNotVerifiedEventsFragment(Context context, List<Event> eventList) {
         mEventList = eventList;
         this.mContext = context;
-        this.mIsChangeEventsClicked = isChangeEventsClicked;
-    }
-
-    public void updateIsChangeEventsClicked(boolean isChangeEventsClicked) {
-        mIsChangeEventsClicked = isChangeEventsClicked;
-        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        FragmentShowEventBinding binding = FragmentShowEventBinding.inflate(inflater, parent, false);
+        FragmentShowNotVerifiedEventsBinding binding = FragmentShowNotVerifiedEventsBinding.inflate(inflater, parent, false);
         return new MyViewHolder(binding);
     }
 
@@ -51,23 +43,25 @@ public class ShowEventFragment extends RecyclerView.Adapter<ShowEventFragment.My
         holder.mBinding.people.setText("Number of companions: " + event.getPeople());
         holder.mBinding.contacts.setText(event.getContacts());
 
+        holder.mBinding.acceptButton.setOnClickListener(v -> FirestoreServices.getInstance().acceptEvent(event.getId(),
+                success -> {
+                    mEventList.remove(position);
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, mEventList.size());
+                }));
+
+        holder.mBinding.rejectButton.setOnClickListener(v -> FirestoreServices.getInstance().rejectEvent(event.getId(),
+                success -> {
+                    mEventList.remove(position);
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, mEventList.size());
+                }));
+
+
         DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
         holder.mBinding.timeOfEvent.setText(dateFormat.format(event.getDateTime()));
-        holder.mBinding.delete.setVisibility(mIsChangeEventsClicked ? View.VISIBLE : View.GONE);
 
-        holder.mBinding.delete.setOnClickListener(v -> FirestoreServices.getInstance().deleteEvent(event.getId(),
-                success -> {
-                    mEventList.remove(position);
-                    notifyItemRemoved(position);
-                    notifyItemRangeChanged(position, mEventList.size());
-                }, error -> ToastUtils.show(mContext, error)));
 
-        holder.mBinding.joinEvent.setOnClickListener(v -> FirestoreServices.getInstance().deleteEvent(event.getId(),
-                success -> {
-                    mEventList.remove(position);
-                    notifyItemRemoved(position);
-                    notifyItemRangeChanged(position, mEventList.size());
-                }, error -> ToastUtils.show(mContext, error)));
     }
 
     @Override
@@ -76,9 +70,9 @@ public class ShowEventFragment extends RecyclerView.Adapter<ShowEventFragment.My
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
-        FragmentShowEventBinding mBinding;
+        FragmentShowNotVerifiedEventsBinding mBinding;
 
-        public MyViewHolder(FragmentShowEventBinding binding) {
+        public MyViewHolder(FragmentShowNotVerifiedEventsBinding binding) {
             super(binding.getRoot());
             mBinding = binding;
         }

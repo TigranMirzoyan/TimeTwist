@@ -2,62 +2,48 @@ package com.timetwist.account;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.timetwist.utils.ActivityUtils;
-import com.timetwist.R;
+import com.timetwist.databinding.ActivityLoginBinding;
 import com.timetwist.firebase.FirebaseLoginRegister;
+import com.timetwist.utils.ActivityUtils;
 
 public class LoginActivity extends AppCompatActivity {
+    private ActivityLoginBinding mBinding;
     private FirebaseLoginRegister mLoginRegister;
-    private EditText mEmail, mPassword;
-    private Button mLogin;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
-        ImageView mClose = findViewById(R.id.closeActivity);
-        TextView mSwitchToRegister = findViewById(R.id.switchToRegister);
-        mEmail = findViewById(R.id.email);
-        mPassword = findViewById(R.id.password);
-        mLogin = findViewById(R.id.loginButton);
+        mBinding = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(mBinding.getRoot());
         mLoginRegister = new FirebaseLoginRegister(this);
 
-        mSwitchToRegister.setOnClickListener(v -> ActivityUtils
+        mBinding.switchToRegister.setOnClickListener(v -> ActivityUtils
                 .changeToRegisterActivity(this));
-        mClose.setOnClickListener(v -> ActivityUtils
+        mBinding.closeActivity.setOnClickListener(v -> ActivityUtils
                 .changeToMainActivity(this));
-        configureLoginButton();
+        mBinding.loginButton.setOnClickListener(v -> configureLoginButton());
     }
 
     private void configureLoginButton() {
-        mLogin.setOnClickListener(v -> {
-            String email = mEmail.getText().toString().trim();
-            String password = mPassword.getText().toString().trim();
-            boolean check = true;
+        String email = mBinding.email.getText().toString().trim();
+        String password = mBinding.password.getText().toString().trim();
+        boolean check = true;
 
-            if (TextUtils.isEmpty(email)) {
-                mEmail.setError("Email is Required");
-                check = false;
-            }
+        if (TextUtils.isEmpty(email)) {
+            mBinding.email.setError("Email is Required");
+            check = false;
+        }
 
-            if (TextUtils.isEmpty(password)) {
-                mPassword.setError("Password is Required");
-                check = false;
-            } else if (password.length() < 8) {
-                mPassword.setError("Password must be more than 7 letters");
-                check = false;
-            }
+        if (TextUtils.isEmpty(password)) {
+            mBinding.password.setError("Password is Required");
+            check = false;
+        } else if (password.length() < 8) {
+            mBinding.password.setError("Password must be more than 7 letters");
+            check = false;
+        }
 
-            if (check) {
-                mLoginRegister.loginUser(email, password);
-            }
-        });
+        if (check) mLoginRegister.loginUser(email, password);
     }
 }
