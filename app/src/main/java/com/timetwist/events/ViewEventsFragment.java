@@ -2,8 +2,6 @@ package com.timetwist.events;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,8 +26,9 @@ public class ViewEventsFragment extends Fragment {
     private final List<Event> mEventList = new ArrayList<>();
     private final List<Event> mDisplayedEvents = new ArrayList<>();
     private FirestoreServices mFirestoreServices;
+    private ActivityUtils mActivityUtils;
     private ShowEventFragment mAdapter;
-    private boolean mIsChangeEventsClicked = false;
+    private int mEventState = 0;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -42,15 +41,17 @@ public class ViewEventsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mFirestoreServices = FirestoreServices.getInstance();
-        ActivityUtils activityUtils = ActivityUtils.getInstance();
+        mActivityUtils = ActivityUtils.getInstance();
 
-        mBinding.closeFragment.setOnClickListener(v ->
-                activityUtils.replace(activityUtils.HOME_FRAGMENT, requireContext()));
+        mBinding.back.setOnClickListener(v ->
+                mActivityUtils.replace(mActivityUtils.HOME_FRAGMENT, requireContext()));
         mBinding.refresh.setOnClickListener(v -> configureRefreshButton());
+        mBinding.globalEvents.setOnClickListener(v -> configureGlobalEventsButton());
         mBinding.myEvents.setOnClickListener(v -> configureChangeEventsButton());
+        mBinding.joinedEvents.setOnClickListener(v -> configureJoinedEventsButton());
         mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        mAdapter = new ShowEventFragment(requireContext(), mDisplayedEvents, mIsChangeEventsClicked);
+        mAdapter = new ShowEventFragment(requireContext(), mDisplayedEvents, mEventState);
         mBinding.recyclerView.setAdapter(mAdapter);
 
         getEvents();
@@ -67,6 +68,14 @@ public class ViewEventsFragment extends Fragment {
 
     private void getMyEvents() {
         mFirestoreServices.getMyEvents(myEvents -> {
+            mEventList.clear();
+            mEventList.addAll(myEvents);
+            filter("");
+        }, error -> ToastUtils.show(requireContext(), "Error: " + error));
+    }
+
+    private void getJoinedEvents() {
+        mFirestoreServices.getJoinedEvents(myEvents -> {
             mEventList.clear();
             mEventList.addAll(myEvents);
             filter("");
@@ -107,26 +116,47 @@ public class ViewEventsFragment extends Fragment {
             ToastUtils.show(requireContext(), "Internet required");
             return;
         }
-        getEvents();
+        switch (mEventState) {
+            case 1:
+                getMyEvents();
+                break;
+            case 2:
+                getJoinedEvents();
+                break;
+            default:
+                getEvents();
+                break;
+        }
     }
 
-    @SuppressLint("SetTextI18n")
+    private void configureGlobalEventsButton() {
+        if (NetworkUtils.isInternetDisconnected(requireContext())) {
+            ToastUtils.show(requireContext(), "Internet required");
+            return;
+        }
+        mEventState = 0;
+        getEvents();
+        mAdapter.updateEventState(mEventState);
+    }
+
     private void configureChangeEventsButton() {
         if (NetworkUtils.isInternetDisconnected(requireContext())) {
             ToastUtils.show(requireContext(), "Internet required");
             return;
         }
+        mEventState = 1;
+        getMyEvents();
+        mAdapter.updateEventState(mEventState);
+    }
 
-        mIsChangeEventsClicked = !mIsChangeEventsClicked;
-        if (mIsChangeEventsClicked) {
-            getMyEvents();
-            mBinding.myEvents.setText("Global Events");
-        } else {
-            getEvents();
-            mBinding.myEvents.setText("My Events");
+    private void configureJoinedEventsButton() {
+        if (NetworkUtils.isInternetDisconnected(requireContext())) {
+            ToastUtils.show(requireContext(), "Internet required");
+            return;
         }
-        new Handler(Looper.getMainLooper()).postDelayed(() ->
-                mAdapter.updateIsChangeEventsClicked(mIsChangeEventsClicked), 100);
+        mEventState = 2;
+        getJoinedEvents();
+        mAdapter.updateEventState(mEventState);
     }
 
     @Override

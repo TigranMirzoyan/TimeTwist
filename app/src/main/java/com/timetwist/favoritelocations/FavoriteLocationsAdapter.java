@@ -1,20 +1,17 @@
 package com.timetwist.favoritelocations;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.timetwist.R;
+import com.timetwist.databinding.FavoriteLocationItemBinding;
 import com.timetwist.interfaces.OnMarkerSelectedListener;
 
 import java.util.List;
 
 public class FavoriteLocationsAdapter extends RecyclerView.Adapter<FavoriteLocationsAdapter.ViewHolder> {
-
     private final List<String> mFavoritePlaces;
     private final OnMarkerSelectedListener mListener;
 
@@ -26,17 +23,15 @@ public class FavoriteLocationsAdapter extends RecyclerView.Adapter<FavoriteLocat
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.favorite_location_item, parent, false);
-        return new ViewHolder(view);
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        FavoriteLocationItemBinding binding = FavoriteLocationItemBinding.inflate(inflater, parent, false);
+        return new ViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         String place = mFavoritePlaces.get(position);
-        holder.textView.setText(place);
-        holder.itemView.setOnClickListener(v -> {
-            if (mListener != null) mListener.onMarkerSelected(place);
-        });
+        holder.bind(place, mListener);
     }
 
     @Override
@@ -45,11 +40,18 @@ public class FavoriteLocationsAdapter extends RecyclerView.Adapter<FavoriteLocat
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView textView;
+        private final FavoriteLocationItemBinding binding;
 
-        public ViewHolder(View view) {
-            super(view);
-            textView = view.findViewById(R.id.textViewFavoriteLocation);
+        public ViewHolder(FavoriteLocationItemBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
+
+        public void bind(String place, OnMarkerSelectedListener listener) {
+            binding.name.setText(place);
+            binding.getRoot().setOnClickListener(v -> {
+                if (listener != null) listener.onMarkerSelected(place);
+            });
         }
     }
 }

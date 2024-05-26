@@ -26,9 +26,9 @@ public class LoginRegisterFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mBinding.loginBtn.setOnClickListener(v -> ActivityUtils
+        mBinding.login.setOnClickListener(v -> ActivityUtils
                 .changeToLoginActivity(requireActivity()));
-        mBinding.regBtn.setOnClickListener(v -> ActivityUtils
+        mBinding.register.setOnClickListener(v -> ActivityUtils
                 .changeToRegisterActivity(requireActivity()));
     }
 

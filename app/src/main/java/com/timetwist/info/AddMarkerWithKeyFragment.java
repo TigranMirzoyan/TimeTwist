@@ -51,6 +51,7 @@ public class AddMarkerWithKeyFragment extends Fragment {
         mBinding.church.setOnClickListener(v -> setType("church", "Church"));
         mBinding.prehistoricSite.setOnClickListener(v -> setType("temple", "Temple"));
         mBinding.tree.setOnClickListener(v -> setType("nature", "Nature"));
+        mBinding.defaultMarker.setOnClickListener(v -> setType("default_marker", "Default"));
     }
 
     private void setType(String type, String displayName) {

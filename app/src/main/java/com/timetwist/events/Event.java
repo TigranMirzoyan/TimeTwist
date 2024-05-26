@@ -9,21 +9,28 @@ public class Event {
     private String name;
     private String username;
     private String description;
+    private String email;
+    private String status;
     private @ServerTimestamp Date dateTime;
-    private int people;
-    private String contacts;
+    private int maxPeople;
+    private int joinedPeople;
 
     public Event() {
     }
 
-    public Event(String id, String name, String username, String description, Date dateTime, int people, String contacts) {
+
+    public Event(String id, String name, String username,
+                 String description, Date dateTime, int maxPeople,
+                 String email, String status, int joinedPeople) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.description = description;
         this.dateTime = dateTime;
-        this.people = people;
-        this.contacts = contacts;
+        this.maxPeople = maxPeople;
+        this.email = email;
+        this.status = status;
+        this.joinedPeople = joinedPeople;
     }
 
     public String getId() {
@@ -46,11 +53,19 @@ public class Event {
         return dateTime;
     }
 
-    public int getPeople() {
-        return people;
+    public int getMaxPeople() {
+        return maxPeople;
     }
 
-    public String getContacts() {
-        return contacts;
+    public String getEmail() {
+        return email;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public int getJoinedPeople() {
+        return joinedPeople;
     }
 }

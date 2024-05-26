@@ -123,16 +123,17 @@ public class MapFragment extends Fragment {
     }
 
     public void configureWebView(String url) {
-        mBinding.webview.setVisibility(View.VISIBLE);
-        mBinding.webview.loadUrl(url);
-        WebSettings webSettings = mBinding.webview.getSettings();
+        mBinding.webView.setVisibility(View.VISIBLE);
+        mBinding.webView.loadUrl(url);
+        WebSettings webSettings = mBinding.webView.getSettings();
+
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
 
-        mBinding.webview.setWebViewClient(new WebViewClient() {
+        mBinding.webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 view.loadUrl(request.getUrl().toString());

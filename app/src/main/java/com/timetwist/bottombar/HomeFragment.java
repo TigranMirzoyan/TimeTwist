@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.timetwist.databinding.FragmentHomeBinding;
 import com.timetwist.utils.ActivityUtils;
+import com.timetwist.utils.NetworkUtils;
 import com.timetwist.utils.ToastUtils;
 
 public class HomeFragment extends Fragment {
@@ -38,6 +39,10 @@ public class HomeFragment extends Fragment {
             ToastUtils.show(requireContext(), "User isn't authorized");
             return;
         }
+        if (NetworkUtils.isInternetDisconnected(requireContext())) {
+            ToastUtils.show(requireContext(), "Internet connection is required");
+            return;
+        }
 
         switch (type) {
             case "MAKE_EVENT":
@@ -62,19 +67,19 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupAdminView() {
-        mBinding.linear1.setVisibility(View.VISIBLE);
-        mBinding.linear2.setVisibility(View.GONE);
-        mBinding.linear3.setVisibility(View.GONE);
+        mBinding.adminSection.setVisibility(View.VISIBLE);
+        mBinding.markerSection.setVisibility(View.GONE);
+        mBinding.eventsSection.setVisibility(View.GONE);
         mBinding.acceptEvents.setOnClickListener(v -> configureButtons("VIEW_UNVERIFIED_EVENTS"));
     }
 
     private void setupRegularView() {
-        mBinding.linear1.setVisibility(View.GONE);
-        mBinding.linear2.setVisibility(View.VISIBLE);
-        mBinding.linear3.setVisibility(View.VISIBLE);
-        mBinding.makeEvent.setOnClickListener(v -> configureButtons("MAKE_EVENT"));
+        mBinding.adminSection.setVisibility(View.GONE);
+        mBinding.markerSection.setVisibility(View.VISIBLE);
+        mBinding.eventsSection.setVisibility(View.VISIBLE);
+        mBinding.createEvent.setOnClickListener(v -> configureButtons("MAKE_EVENT"));
         mBinding.viewEvents.setOnClickListener(v -> configureButtons("VIEW_EVENTS"));
-        mBinding.addMarkerWithKey.setOnClickListener(v -> configureButtons("ADD_MARKER"));
+        mBinding.addMarker.setOnClickListener(v -> configureButtons("ADD_MARKER"));
     }
 
     @Override

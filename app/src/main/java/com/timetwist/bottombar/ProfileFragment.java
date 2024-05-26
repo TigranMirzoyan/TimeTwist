@@ -36,18 +36,16 @@ public class ProfileFragment extends Fragment {
         mFirestoreServices = FirestoreServices.getInstance();
         updateAdminVisibility();
 
-        mBinding.favoritePlaces.setOnClickListener(v -> handleFavoritePlacesButton());
-        mBinding.logOutButton.setOnClickListener(v -> handleLogOutButton());
+        mBinding.favoritePlaces.setOnClickListener(v -> configureFavoritePlacesButton());
+        mBinding.logOut.setOnClickListener(v -> configureLogOutButton());
         loadProfileData();
     }
 
     private void loadProfileData() {
         mFirestoreServices.updateProfileUI((username, email) -> {
-            if (isAdded()) {
-                mUsername = username;
-                mBinding.username.setText(username);
-                mBinding.email.setText(email);
-            }
+            mUsername = username;
+            mBinding.username.setText(username);
+            mBinding.email.setText(email);
         });
     }
 
@@ -57,7 +55,7 @@ public class ProfileFragment extends Fragment {
                 () -> mBinding.favoritePlaces.setVisibility(View.VISIBLE));
     }
 
-    private void handleFavoritePlacesButton() {
+    private void configureFavoritePlacesButton() {
         if (NetworkUtils.isInternetDisconnected(requireContext())) {
             ToastUtils.show(requireContext(), "Internet required");
             return;
@@ -65,7 +63,7 @@ public class ProfileFragment extends Fragment {
         mActivityUtils.replace(mActivityUtils.FAVORITE_LOCATIONS_FRAGMENT, requireContext());
     }
 
-    private void handleLogOutButton() {
+    private void configureLogOutButton() {
         FirebaseAuth.getInstance().signOut();
         ActivityUtils.changeToLoginActivity(requireActivity());
     }

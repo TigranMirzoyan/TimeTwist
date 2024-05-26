@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.timetwist.databinding.FragmentNotVerifiedEventsBinding;
-import com.timetwist.databinding.FragmentViewEventsBinding;
 import com.timetwist.firebase.FirestoreServices;
 import com.timetwist.utils.ActivityUtils;
 import com.timetwist.utils.NetworkUtils;
@@ -42,7 +41,7 @@ public class NotVerifiedEventsFragment extends Fragment {
         mFirestoreServices = FirestoreServices.getInstance();
         ActivityUtils activityUtils = ActivityUtils.getInstance();
 
-        mBinding.closeFragment.setOnClickListener(v ->
+        mBinding.back.setOnClickListener(v ->
                 activityUtils.replace(activityUtils.HOME_FRAGMENT, requireContext()));
         mBinding.refresh.setOnClickListener(v -> configureRefreshButton());
         mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));

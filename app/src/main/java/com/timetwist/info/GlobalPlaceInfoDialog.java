@@ -2,7 +2,10 @@ package com.timetwist.info;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -19,16 +22,20 @@ import com.timetwist.utils.ActivityUtils;
 import com.timetwist.utils.NetworkUtils;
 import com.timetwist.utils.ToastUtils;
 
+import java.util.Locale;
 import java.util.Objects;
 
 public class GlobalPlaceInfoDialog extends DialogFragment {
     private final OnFavoriteUpdateListener mUpdateListener;
     private final String mTitle;
     private final String mDescription;
+    private FragmentGlobalPlaceInfoDialogBinding mBinding;
     private FirestoreServices mFirestoreServices;
     private ActivityUtils mActivityUtils;
-    private FragmentGlobalPlaceInfoDialogBinding mBinding;
-    private boolean mButtonClicked;
+    private TextToSpeech mTextToSpeech;
+    private boolean mIsSpeaking = false;
+    private boolean mIsFavorite;
+
 
     public interface OnFavoriteUpdateListener {
         void onFavoriteAdded(String title);
@@ -41,7 +48,15 @@ public class GlobalPlaceInfoDialog extends DialogFragment {
         mTitle = title;
         mDescription = description;
         mUpdateListener = updateListener;
-        mButtonClicked = bool;
+        mIsFavorite = bool;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mTextToSpeech.stop();
+        mIsSpeaking = !mIsSpeaking;
+        changeSpeakerDrawable();
     }
 
     @NonNull
@@ -53,14 +68,20 @@ public class GlobalPlaceInfoDialog extends DialogFragment {
         mFirestoreServices = FirestoreServices.getInstance();
         mActivityUtils = ActivityUtils.getInstance();
 
-        mBinding.placeDescription.setMovementMethod(new ScrollingMovementMethod());
-        mBinding.placeTitle.setText(mTitle);
-        mBinding.placeDescription.setText(mDescription);
-        mBinding.cancelID.setOnClickListener(v -> dismiss());
-        mBinding.favoriteLocation.setOnClickListener(v -> configureFavoriteButton());
-        mBinding.readMore.setOnClickListener(v -> configureReadMoreButton());
-        changeDrawable();
+        mBinding.title.setText(mTitle);
+        mBinding.description.setMovementMethod(new ScrollingMovementMethod());
+        mBinding.description.setText(mDescription);
 
+        mBinding.cancelID.setOnClickListener(v -> {
+            dismiss();
+            mTextToSpeech.stop();
+        });
+
+        initializeTextToSpeech();
+        mBinding.favorite.setOnClickListener(v -> configureFavoriteButton());
+        mBinding.readMore.setOnClickListener(v -> configureReadMoreButton());
+
+        changeFavoriteButtonDrawable();
         builder.setView(view);
         AlertDialog dialog = builder.create();
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
@@ -68,15 +89,51 @@ public class GlobalPlaceInfoDialog extends DialogFragment {
         return dialog;
     }
 
+    private void initializeTextToSpeech() {
+        mBinding.textToSpeechLoading.setVisibility(View.VISIBLE);
+        mTextToSpeech = new TextToSpeech(requireContext(), status -> {
+            mBinding.textToSpeechLoading.setVisibility(View.GONE);
+            if (status != TextToSpeech.SUCCESS) {
+                Log.e("GlobalPlaceInfoDialog", "Initialization failed");
+                return;
+            }
+
+            int result = mTextToSpeech.setLanguage(Locale.getDefault());
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("GlobalPlaceInfoDialog", "Language not supported");
+                return;
+            }
+            mBinding.textSpeech.setOnClickListener(v -> speakDescription());
+        });
+
+        mTextToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) {
+
+            }
+
+            @Override
+            public void onDone(String utteranceId) {
+                mIsSpeaking = !mIsSpeaking;
+                changeSpeakerDrawable();
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+
+            }
+        });
+    }
+
     private void configureFavoriteButton() {
         if (NetworkUtils.isInternetDisconnected(requireContext())) {
             ToastUtils.show(requireContext(), "Internet required");
             return;
         }
-        mButtonClicked = !mButtonClicked;
-        changeDrawable();
+        mIsFavorite = !mIsFavorite;
+        changeFavoriteButtonDrawable();
 
-        if (mButtonClicked) {
+        if (mIsFavorite) {
             mFirestoreServices.makeFavoriteLocation(mTitle,
                     success -> {
                         ToastUtils.show(requireContext(), success);
@@ -95,23 +152,46 @@ public class GlobalPlaceInfoDialog extends DialogFragment {
                 error -> ToastUtils.show(requireContext(), error));
     }
 
-    private void changeDrawable() {
-        mBinding.favoriteLocation.setBackground(ContextCompat.getDrawable(requireContext(),
-                mButtonClicked ? R.drawable.favorite_button_clicked : R.drawable.favorite_button_not_clicked));
-    }
-    private void configureReadMoreButton(){
+    private void configureReadMoreButton() {
         if (NetworkUtils.isInternetDisconnected(requireContext())) {
             ToastUtils.show(requireContext(), "Internet required");
             return;
         }
-        String url = "https://en.wikipedia.org/wiki/" + mTitle.replaceAll(" ", "_");
+        String url = "https://en.wikipedia.org/wiki/"
+                + mTitle.replaceAll(" ", "_");
         mActivityUtils.MAP_FRAGMENT.configureWebView(url);
         dismiss();
+    }
+
+    private void speakDescription() {
+        if (mTextToSpeech == null) return;
+        mIsSpeaking = !mIsSpeaking;
+        changeSpeakerDrawable();
+
+        if (!mIsSpeaking) {
+            mTextToSpeech.stop();
+            return;
+        }
+
+        mTextToSpeech.speak(mDescription, TextToSpeech.QUEUE_ADD, null, "");
+    }
+
+    private void changeFavoriteButtonDrawable() {
+        mBinding.favorite.setBackground(ContextCompat.getDrawable(requireContext(),
+                mIsFavorite ? R.drawable.favorite_button_clicked
+                        : R.drawable.favorite_button_not_clicked));
+    }
+
+    private void changeSpeakerDrawable() {
+        mBinding.textSpeech.setBackground(ContextCompat.getDrawable(requireContext(),
+                mIsSpeaking ? R.drawable.off_speaking : R.drawable.on_speaking));
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        mTextToSpeech.stop();
+        mTextToSpeech.shutdown();
         mBinding = null;
     }
 }

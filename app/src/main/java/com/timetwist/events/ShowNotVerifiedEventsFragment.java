@@ -38,19 +38,19 @@ public class ShowNotVerifiedEventsFragment extends
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Event event = mEventList.get(position);
         holder.mBinding.title.setText(event.getName());
-        holder.mBinding.userName.setText(event.getUsername());
+        holder.mBinding.username.setText(event.getUsername());
         holder.mBinding.description.setText(event.getDescription());
-        holder.mBinding.people.setText("Number of companions: " + event.getPeople());
-        holder.mBinding.contacts.setText(event.getContacts());
+        holder.mBinding.companions.setText("Number of companions: " + event.getMaxPeople());
+        holder.mBinding.email.setText(event.getEmail());
 
-        holder.mBinding.acceptButton.setOnClickListener(v -> FirestoreServices.getInstance().acceptEvent(event.getId(),
+        holder.mBinding.accept.setOnClickListener(v -> FirestoreServices.getInstance().acceptEvent(event.getId(),
                 success -> {
                     mEventList.remove(position);
                     notifyItemRemoved(position);
                     notifyItemRangeChanged(position, mEventList.size());
                 }));
 
-        holder.mBinding.rejectButton.setOnClickListener(v -> FirestoreServices.getInstance().rejectEvent(event.getId(),
+        holder.mBinding.reject.setOnClickListener(v -> FirestoreServices.getInstance().rejectEvent(event.getId(),
                 success -> {
                     mEventList.remove(position);
                     notifyItemRemoved(position);
@@ -59,7 +59,7 @@ public class ShowNotVerifiedEventsFragment extends
 
 
         DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
-        holder.mBinding.timeOfEvent.setText(dateFormat.format(event.getDateTime()));
+        holder.mBinding.time.setText(dateFormat.format(event.getDateTime()));
 
 
     }

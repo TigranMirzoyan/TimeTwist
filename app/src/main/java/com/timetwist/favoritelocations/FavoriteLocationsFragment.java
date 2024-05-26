@@ -22,9 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FavoriteLocationsFragment extends Fragment {
-    private FragmentFavoriteLocationsBinding mBinding;
     private final List<String> mFavoriteMarkers = new ArrayList<>();
     private final List<String> mDisplayedMarkers = new ArrayList<>();
+    private FragmentFavoriteLocationsBinding mBinding;
     private FirestoreServices mFirestoreServices;
     private FavoriteLocationsAdapter mAdapter;
     private OnMarkerSelectedListener mListener;
@@ -41,9 +41,9 @@ public class FavoriteLocationsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mFirestoreServices = FirestoreServices.getInstance();
 
-        mBinding.recyclerViewFavoriteLocations.setLayoutManager(new LinearLayoutManager(requireContext()));
+        mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         mAdapter = new FavoriteLocationsAdapter(mDisplayedMarkers, mListener);
-        mBinding.recyclerViewFavoriteLocations.setAdapter(mAdapter);
+        mBinding.recyclerView.setAdapter(mAdapter);
 
         getFavoritePlaces();
         setupSearchView();

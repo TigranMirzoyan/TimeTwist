@@ -16,10 +16,10 @@
         android:background="@drawable/background_blue" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewFavoriteLocations"
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/searchView"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="8dp" />
 
 </RelativeLayout>

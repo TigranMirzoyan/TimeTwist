@@ -42,9 +42,9 @@
         <Button
             android:id="@+id/refresh"
             style="@android:style/Widget.Button"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginEnd="16dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/refresh_button" />
     </LinearLayout>
 
@@ -52,17 +52,17 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/closeFragment"
+        android:layout_above="@id/back"
         android:layout_below="@id/linear"
         android:layout_marginTop="16dp" />
 
     <Button
-        android:id="@+id/closeFragment"
+        android:id="@+id/back"
         style="@android:style/Widget.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_margin="20dp"
+        android:layout_margin="16dp"
         android:background="@drawable/background_blue"
         android:text="Back"
         android:textColor="@color/white"

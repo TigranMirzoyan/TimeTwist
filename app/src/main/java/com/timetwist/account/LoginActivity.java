@@ -11,24 +11,30 @@ import com.timetwist.utils.ActivityUtils;
 
 public class LoginActivity extends AppCompatActivity {
     private ActivityLoginBinding mBinding;
-    private FirebaseLoginRegister mLoginRegister;
+    private FirebaseLoginRegister mFirebaseLoginRegister;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
-        mLoginRegister = new FirebaseLoginRegister(this);
+        mFirebaseLoginRegister = new FirebaseLoginRegister(this);
 
         mBinding.switchToRegister.setOnClickListener(v -> ActivityUtils
                 .changeToRegisterActivity(this));
-        mBinding.closeActivity.setOnClickListener(v -> ActivityUtils
+        mBinding.close.setOnClickListener(v -> ActivityUtils
                 .changeToMainActivity(this));
-        mBinding.loginButton.setOnClickListener(v -> configureLoginButton());
+        mBinding.login.setOnClickListener(v -> configureLoginButton());
     }
 
     private void configureLoginButton() {
         String email = mBinding.email.getText().toString().trim();
         String password = mBinding.password.getText().toString().trim();
+
+        if (checkForErrors(email, password))
+            mFirebaseLoginRegister.loginUser(email, password);
+    }
+
+    private boolean checkForErrors(String email, String password) {
         boolean check = true;
 
         if (TextUtils.isEmpty(email)) {
@@ -42,8 +48,10 @@ public class LoginActivity extends AppCompatActivity {
         } else if (password.length() < 8) {
             mBinding.password.setError("Password must be more than 7 letters");
             check = false;
+        } else if (password.length() > 50) {
+            mBinding.password.setError("Password must be <= 50 letters");
+            check = false;
         }
-
-        if (check) mLoginRegister.loginUser(email, password);
+        return check;
     }
 }

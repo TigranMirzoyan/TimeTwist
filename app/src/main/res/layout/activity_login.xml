@@ -9,7 +9,7 @@
     tools:context=".account.LoginActivity">
 
     <ImageView
-        android:id="@+id/closeActivity"
+        android:id="@+id/close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -43,9 +43,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:layout_marginEnd="50dp"
             android:layout_marginBottom="20dp"
-            android:text="HI,\nPlease Login"
+            android:text="Hi,Please Login"
             android:textColor="@color/marian_blue"
             android:textSize="40sp"
             android:textStyle="bold" />
@@ -57,7 +56,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="32dp"
+                android:layout_marginHorizontal="16dp"
                 android:background="@drawable/background_white"
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
@@ -65,8 +64,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="32dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
                     android:text="Email"
                     android:textColor="@color/amaranth_purple" />
@@ -75,7 +74,7 @@
                     android:id="@+id/email"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginHorizontal="16dp"
                     android:autofillHints="emailAddress"
                     android:background="@drawable/background_red"
                     android:ems="10"
@@ -90,7 +89,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginHorizontal="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
                     android:text="Password"
@@ -100,7 +99,7 @@
                     android:id="@+id/password"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginHorizontal="16dp"
                     android:autofillHints="password"
                     android:background="@drawable/background_red"
                     android:ems="10"
@@ -112,28 +111,30 @@
                     android:textColorHint="@color/white"
                     android:textSize="16sp" />
 
-                <Button
-                    android:id="@+id/loginButton"
-                    style="@android:style/Widget.Button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="32dp"
-                    android:layout_marginVertical="16dp"
-                    android:background="@drawable/background_blue"
-                    android:text="Login"
-                    android:textColor="@color/white"
-                    android:textSize="20sp" />
-
                 <TextView
                     android:id="@+id/switchToRegister"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginHorizontal="16dp"
                     android:text="Don't have an account? Click here!"
                     android:textAlignment="center"
                     android:textColor="@color/marian_blue"
                     android:textSize="16sp"
                     android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/login"
+                    style="@android:style/Widget.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/background_blue"
+                    android:text="Login"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

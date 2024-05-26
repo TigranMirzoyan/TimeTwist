@@ -48,7 +48,7 @@ public class FirebaseLoginRegister {
                 ToastUtils.show(mContext, "The email address is already in use by another account");
                 return;
             }
-            mAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(task1 -> {
+            Objects.requireNonNull(mAuth.getCurrentUser()).sendEmailVerification().addOnCompleteListener(task1 -> {
                 if (!task.isSuccessful()) {
                     ToastUtils.show(mContext, "Error! Maybe this account already exists?");
                     return;

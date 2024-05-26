@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="20dp"
-            android:text="Welcome to\nyour Profile!"
+            android:text="Welcome to Profile"
             android:textColor="@color/marian_blue"
             android:textSize="40sp"
             android:textStyle="bold" />
@@ -97,11 +97,11 @@
             android:text="Favorite places"
             android:textColor="@color/white"
             android:textSize="26sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
     </LinearLayout>
 
     <Button
-        android:id="@+id/logOutButton"
+        android:id="@+id/logOut"
         style="@android:style/Widget.Button"
         android:layout_width="128dp"
         android:layout_height="64dp"

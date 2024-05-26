@@ -53,7 +53,7 @@
                     android:textColor="@color/amaranth_purple" />
 
                 <AutoCompleteTextView
-                    android:id="@+id/eventName"
+                    android:id="@+id/name"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginHorizontal="32dp"
@@ -76,7 +76,7 @@
                     android:textColor="@color/marian_blue" />
 
                 <TextView
-                    android:id="@+id/dataTime"
+                    android:id="@+id/time"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginHorizontal="32dp"
@@ -97,7 +97,7 @@
                     android:textColor="@color/marian_blue" />
 
                 <EditText
-                    android:id="@+id/numberOfCompanions"
+                    android:id="@+id/companions"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginHorizontal="32dp"
@@ -117,18 +117,18 @@
                     android:layout_marginHorizontal="32dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
-                    android:text="Your Contact"
+                    android:text="Your Email"
                     android:textColor="@color/marian_blue" />
 
                 <EditText
-                    android:id="@+id/howToContact"
+                    android:id="@+id/email"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginHorizontal="32dp"
                     android:background="@drawable/background_blue"
                     android:ems="10"
-                    android:hint="Chatting App -> Username"
-                    android:inputType="text"
+                    android:hint="Enter here"
+                    android:inputType="textEmailAddress"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     android:textColor="@color/white"
@@ -145,7 +145,7 @@
                     android:textColor="@color/amaranth_purple" />
 
                 <EditText
-                    android:id="@+id/eventDescription"
+                    android:id="@+id/description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="32dp"
@@ -172,7 +172,7 @@
                     android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/closeFragment"
+                        android:id="@+id/back"
                         style="@android:style/Widget.Button"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -183,7 +183,7 @@
                         android:textSize="20sp" />
 
                     <Button
-                        android:id="@+id/makeEventButton"
+                        android:id="@+id/makeEvent"
                         style="@android:style/Widget.Button"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"

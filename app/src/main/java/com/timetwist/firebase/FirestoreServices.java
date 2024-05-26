@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.SetOptions;
 import com.timetwist.events.Event;
+import com.timetwist.events.EventStatus;
 import com.timetwist.interfaces.QuintConsumer;
 import com.timetwist.interfaces.TriConsumer;
 
@@ -156,7 +157,8 @@ public class FirestoreServices {
     public void getGlobalMarkerNames(Consumer<List<String>> onSuccess, Consumer<String> onFailure) {
         mDb.collection("Locations").get().addOnCompleteListener(task -> {
             if (!task.isSuccessful() || task.getResult() == null) {
-                onFailure.accept("Failed to fetch marker names: " + Objects.requireNonNull(task.getException()).getMessage());
+                onFailure.accept("Failed to fetch marker names: "
+                        + Objects.requireNonNull(task.getException()).getMessage());
                 return;
             }
             List<String> names = new ArrayList<>();
@@ -253,8 +255,10 @@ public class FirestoreServices {
         markerData.put("type", type);
 
         mDb.collection("Locations").document(name).set(markerData)
-                .addOnSuccessListener(aVoid -> onSuccess.accept("Marker saved with name: " + name))
-                .addOnFailureListener(e -> onFailure.accept("Failed to save marker: " + e.getMessage()));
+                .addOnSuccessListener(aVoid -> onSuccess
+                        .accept("Marker saved with name: " + name))
+                .addOnFailureListener(e -> onFailure
+                        .accept("Failed to save marker: " + e.getMessage()));
     }
 
     public void deleteCustomMarker(String markerId, Consumer<String> onSuccess,
@@ -270,47 +274,55 @@ public class FirestoreServices {
                         .accept("Error deleting marker"));
     }
 
+    public void updateCustomMarker(String markerId, String newTitle, String newDescription,
+                                   Consumer<String> onSuccess, Consumer<String> errorHandler) {
+        if (mCurrentUser == null) return;
+        mDb.collection("Users")
+                .document(mCurrentUser.getUid())
+                .collection("Markers")
+                .document(markerId)
+                .update("name", newTitle, "description", newDescription)
+                .addOnSuccessListener(task -> onSuccess
+                        .accept("Marker updated successfully"))
+                .addOnFailureListener(e -> errorHandler
+                        .accept("Error changing marker data"));
+    }
+
+
     public void makeEvent(String eventName, String username, String description,
-                          Calendar calendar, String contacts, int number,
+                          Calendar calendar, String email, int maxPeople,
                           Consumer<String> onSuccess, Consumer<String> onFailure) {
         if (mCurrentUser == null) {
             onFailure.accept("User is not authenticated");
             return;
         }
 
-        com.google.firebase.Timestamp timestamp = new com.google.firebase.Timestamp(calendar.getTime());
+        com.google.firebase.Timestamp timestamp
+                = new com.google.firebase.Timestamp(calendar.getTime());
         Map<String, Object> event = new HashMap<>();
         event.put("name", eventName);
         event.put("username", username);
         event.put("description", description);
         event.put("dateTime", timestamp);
-        event.put("people", number);
-        event.put("contacts", contacts);
-        event.put("isAccepted", false);
-        event.put("rejected", false);
+        event.put("maxPeople", maxPeople);
+        event.put("joinedPeople", 1);
+        event.put("email", email);
+        event.put("userId", mCurrentUser.getUid());
+        event.put("status", EventStatus.NONE.name());
 
         mDb.collection("Events")
                 .add(event)
                 .addOnSuccessListener(documentReference -> {
-                    String eventId = documentReference.getId();
-                    documentReference.update("id", eventId)
-                            .addOnSuccessListener(aVoid -> {
-                                onSuccess.accept("Event created successfully!");
-
-                                mDb.collection("Users")
-                                        .document(mCurrentUser.getUid())
-                                        .update("events", FieldValue.arrayUnion(eventId));
-                            })
-                            .addOnFailureListener(e -> onFailure.accept("Failed to update event with ID: " + e.getMessage()));
+                    documentReference.update("id", documentReference.getId());
+                    mDb.collection("Users")
+                            .document(mCurrentUser.getUid())
+                            .update("events", FieldValue.arrayUnion(documentReference.getId()));
+                    onSuccess.accept("Event created successfully!");
                 })
-                .addOnFailureListener(e -> onFailure.accept("Failed to create event: " + e.getMessage()));
+                .addOnFailureListener(e -> onFailure.accept("Failed to create event: "
+                        + e.getMessage()));
     }
 
-    public void joinEvent(String eventId) {
-        mDb.collection("Users")
-                .document(mCurrentUser.getUid())
-                .update("events", FieldValue.arrayUnion(eventId));
-    }
 
     public void getNotVerifiedEvents(BiConsumer<List<Event>, List<Event>> callback,
                                      Consumer<String> errorHandler) {
@@ -325,8 +337,8 @@ public class FirestoreServices {
                     List<Event> randomEventList;
 
                     task.getResult().forEach(document -> {
-                        Boolean rejected = document.getBoolean("rejected");
-                        if (Boolean.FALSE.equals(rejected)) {
+                        EventStatus status = EventStatus.valueOf(document.getString("status"));
+                        if (status == EventStatus.NONE) {
                             Event event = document.toObject(Event.class);
                             eventList.add(event);
                         }
@@ -342,29 +354,41 @@ public class FirestoreServices {
 
     public void getEvents(BiConsumer<List<Event>, List<Event>> callback,
                           Consumer<String> errorHandler) {
-        mDb.collection("Events").get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        errorHandler.accept("Error getting Events documents: " +
-                                Objects.requireNonNull(task.getException()).getMessage());
-                        return;
-                    }
-                    List<Event> eventList = new ArrayList<>();
-                    List<Event> randomEventList;
+        mDb.collection("Users").document(mCurrentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    List<String> eventIds = (List<String>) documentSnapshot.get("joinedEvents");
+                    mDb.collection("Events").get()
+                            .addOnCompleteListener(task -> {
+                                if (!task.isSuccessful()) {
+                                    errorHandler.accept("Error getting Events documents: " +
+                                            Objects.requireNonNull(task.getException()).getMessage());
+                                    return;
+                                }
+                                List<Event> eventList = new ArrayList<>();
+                                List<Event> randomEventList;
 
-                    task.getResult().forEach(document -> {
-                        Boolean isAccepted = document.getBoolean("isAccepted");
-                        if (Boolean.TRUE.equals(isAccepted)) {
-                            Event event = document.toObject(Event.class);
-                            eventList.add(event);
-                        }
-                    });
+                                task.getResult().forEach(document -> {
+                                    EventStatus status = EventStatus
+                                            .valueOf(document.getString("status"));
+                                    if (status != EventStatus.ACCEPTED || eventIds == null
+                                            || eventIds.contains(document.getId()))
+                                        return;
 
-                    Collections.shuffle(eventList);
-                    int randomListSize = Math.min(eventList.size(), 10);
-                    randomEventList = eventList.subList(0, randomListSize);
+                                    Event event = document.toObject(Event.class);
+                                    if (event.getJoinedPeople() >= event.getMaxPeople() ||
+                                            Objects.requireNonNull(document.getString("userId"))
+                                                    .equals(mCurrentUser.getUid()))
+                                        return;
+                                    eventList.add(event);
+                                });
 
-                    callback.accept(eventList, new ArrayList<>(randomEventList));
+                                Collections.shuffle(eventList);
+                                int randomListSize = Math.min(eventList.size(), 10);
+                                randomEventList = eventList.subList(0, randomListSize);
+
+                                callback.accept(eventList, new ArrayList<>(randomEventList));
+                            });
                 });
     }
 
@@ -396,45 +420,106 @@ public class FirestoreServices {
                                         onSuccess.accept(myEvents);
                                     }
                                 })
-                                .addOnFailureListener(e -> onFailure.accept("Failed to fetch event: " + e.getMessage()));
+                                .addOnFailureListener(e -> onFailure
+                                        .accept("Failed to fetch event: " + e.getMessage()));
                     }
                 })
-                .addOnFailureListener(e -> onFailure.accept("Failed to fetch user events: " + e.getMessage()));
+                .addOnFailureListener(e -> onFailure
+                        .accept("Failed to fetch user events: " + e.getMessage()));
     }
 
+    public void getJoinedEvents(Consumer<List<Event>> onSuccess, Consumer<String> onFailure) {
+        if (mCurrentUser == null) {
+            onFailure.accept("User is not authenticated");
+            return;
+        }
 
-    public void updateCustomMarker(String markerId, String newTitle, String newDescription,
-                                   Consumer<String> onSuccess, Consumer<String> errorHandler) {
-        if (mCurrentUser == null) return;
         mDb.collection("Users").document(mCurrentUser.getUid())
-                .collection("Markers").document(markerId)
-                .update("name", newTitle, "description", newDescription)
-                .addOnSuccessListener(task -> onSuccess.accept("Marker updated successfully"))
-                .addOnFailureListener(e -> errorHandler.accept("Error changing marker data"));
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    List<String> eventIds = (List<String>) documentSnapshot.get("joinedEvents");
+                    if (eventIds == null || eventIds.isEmpty()) {
+                        onSuccess.accept(new ArrayList<>());
+                        return;
+                    }
+
+                    List<Event> myEvents = new ArrayList<>();
+                    for (String eventId : eventIds) {
+                        mDb.collection("Events").document(eventId)
+                                .get()
+                                .addOnSuccessListener(eventSnapshot -> {
+                                    Event event = eventSnapshot.toObject(Event.class);
+                                    if (event != null) {
+                                        myEvents.add(event);
+                                    }
+                                    if (myEvents.size() == eventIds.size()) {
+                                        onSuccess.accept(myEvents);
+                                    }
+                                })
+                                .addOnFailureListener(e -> onFailure
+                                        .accept("Failed to fetch event: " + e.getMessage()));
+                    }
+                })
+                .addOnFailureListener(e -> onFailure
+                        .accept("Failed to fetch user events: " + e.getMessage()));
     }
 
     public void deleteEvent(String eventId, Consumer<String> onSuccess, Consumer<String> onFailure) {
         if (mCurrentUser == null) return;
         mDb.collection("Events").document(eventId)
                 .delete()
-                .addOnSuccessListener(aVoid -> mDb.collection("Users").document(mCurrentUser.getUid())
-                        .update("events", FieldValue.arrayRemove(eventId))
-                        .addOnSuccessListener(aVoid1 -> onSuccess.accept("Event deleted successfully"))
-                        .addOnFailureListener(e -> onFailure.accept("Event deleted, but failed to remove event ID from user: " + e.getMessage())))
-                .addOnFailureListener(e -> onFailure.accept("Error deleting event: " + e.getMessage()));
+                .addOnSuccessListener(aVoid ->
+                        mDb.collection("Users")
+                                .document(mCurrentUser.getUid())
+                                .update("events", FieldValue.arrayRemove(eventId))
+                                .addOnSuccessListener(aVoid1 -> onSuccess
+                                        .accept("Event deleted successfully"))
+                                .addOnFailureListener(e -> onFailure
+                                        .accept("Event deleted, but failed to" +
+                                                " remove event ID from user: " + e.getMessage())))
+                .addOnFailureListener(e -> onFailure
+                        .accept("Error deleting event: " + e.getMessage()));
+    }
+
+    public void joinEvent(String eventId, Consumer<String> onSuccess) {
+        if (mCurrentUser == null) return;
+        mDb.collection("Users")
+                .document(mCurrentUser.getUid())
+                .update("joinedEvents", FieldValue.arrayUnion(eventId))
+                .addOnSuccessListener(aVoid -> mDb.collection("Events")
+                        .document(eventId)
+                        .update("joinedPeople", FieldValue.increment(1))
+                        .addOnSuccessListener(aVoid1 -> onSuccess.accept("Event joined successfully!")));
+    }
+
+    public void leaveEvent(String eventId, Consumer<String> onSuccess, Consumer<String> onFailure) {
+        if (mCurrentUser == null) return;
+        mDb.collection("Users")
+                .document(mCurrentUser.getUid())
+                .update("joinedEvents", FieldValue.arrayRemove(eventId))
+                .addOnSuccessListener(aVoid -> mDb.collection("Events")
+                        .document(eventId)
+                        .update("joinedPeople", FieldValue.increment(-1))
+                        .addOnSuccessListener(aVoid1 -> onSuccess.accept("Event left successfully"))
+                        .addOnFailureListener(e -> onFailure.accept("Event left," +
+                                " but failed to update joined people count: " + e.getMessage())))
+                .addOnFailureListener(e -> onFailure.accept("Event left," +
+                        " but failed to remove event ID from user: " + e.getMessage()));
     }
 
     public void acceptEvent(String eventId, Consumer<String> onSuccess) {
-        if (mCurrentUser == null) return;
-        mDb.collection("Events").document(eventId)
-                .update("isAccepted", true)
+        if (mCurrentUser == null || eventId == null) return;
+        mDb.collection("Events")
+                .document(eventId)
+                .update("status", EventStatus.ACCEPTED.name())
                 .addOnSuccessListener(aVoid -> onSuccess.accept("Event accepted successfully"));
     }
 
     public void rejectEvent(String eventId, Consumer<String> onSuccess) {
-        if (mCurrentUser == null) return;
-        mDb.collection("Events").document(eventId)
-                .update("rejected", true)
-                .addOnSuccessListener(aVoid -> onSuccess.accept("Event accepted successfully"));
+        if (mCurrentUser == null || eventId == null) return;
+        mDb.collection("Events")
+                .document(eventId)
+                .update("status", EventStatus.REJECTED.name())
+                .addOnSuccessListener(aVoid -> onSuccess.accept("Event rejected successfully"));
     }
 }

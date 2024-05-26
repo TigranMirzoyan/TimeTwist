@@ -11,33 +11,39 @@ import com.timetwist.utils.ActivityUtils;
 
 public class RegisterActivity extends AppCompatActivity {
     private ActivityRegisterBinding mBinding;
-    private FirebaseLoginRegister mLoginRegister;
+    private FirebaseLoginRegister mFirebaseLoginRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityRegisterBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
-        mLoginRegister = new FirebaseLoginRegister(this);
+        mFirebaseLoginRegister = new FirebaseLoginRegister(this);
 
         mBinding.switchToLogin.setOnClickListener(v -> ActivityUtils
                 .changeToLoginActivity(this));
-        mBinding.closeActivity.setOnClickListener(v -> ActivityUtils
+        mBinding.close.setOnClickListener(v -> ActivityUtils
                 .changeToMainActivity(this));
-        mBinding.registerButton.setOnClickListener(v -> configureRegisterBtn());
+        mBinding.register.setOnClickListener(v -> configureRegisterBtn());
     }
 
     private void configureRegisterBtn() {
         String username = mBinding.username.getText().toString().trim();
         String email = mBinding.email.getText().toString().trim();
         String password = mBinding.password.getText().toString().trim();
+
+
+        if (checkForErrors(username, email, password))
+            mFirebaseLoginRegister.createUser(username, email, password);
+    }
+
+    private boolean checkForErrors(String username, String email, String password) {
         boolean check = true;
 
         if (username.length() < 4) {
             mBinding.username.setError("Username should be >= 4 letters");
             check = false;
-        }
-        if (username.length() > 16) {
+        } else if (username.length() > 16) {
             mBinding.username.setError("Username should be <= 16 letters");
             check = false;
         }
@@ -57,7 +63,6 @@ public class RegisterActivity extends AppCompatActivity {
             mBinding.password.setError("Password must be <= 50 letters");
             check = false;
         }
-
-        if (check) mLoginRegister.createUser(username, email, password);
+        return check;
     }
 }

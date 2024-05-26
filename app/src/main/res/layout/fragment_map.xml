@@ -41,7 +41,7 @@
             android:orientation="vertical">
 
             <Button
-                android:id="@+id/myLocationBtn"
+                android:id="@+id/myLocation"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:background="@drawable/my_location_not_visible" />
@@ -86,7 +86,7 @@
         android:visibility="gone" />
 
     <WebView
-        android:id="@+id/webview"
+        android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"/>
