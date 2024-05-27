@@ -67,7 +67,7 @@ public class CreateGlobalMarkerFragment extends DialogFragment {
         });
 
         mBinding.close.setOnClickListener(v -> dismiss());
-        mBinding.save.setOnClickListener(v -> handleSaveButtonClick());
+        mBinding.save.setOnClickListener(v -> configureSaveButtonClick());
 
         setupAutocomplete();
 
@@ -121,13 +121,13 @@ public class CreateGlobalMarkerFragment extends DialogFragment {
             }
 
             @Override
-            public void onFailure(Call<List<Object>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<Object>> call, @NonNull Throwable t) {
                 ToastUtils.show(requireContext(), "Failed to fetch suggestions: " + t.getMessage());
             }
         });
     }
 
-    private void handleSaveButtonClick() {
+    private void configureSaveButtonClick() {
         if (NetworkUtils.isInternetDisconnected(requireContext())) {
             ToastUtils.show(requireContext(), "Internet required");
             return;
@@ -155,7 +155,7 @@ public class CreateGlobalMarkerFragment extends DialogFragment {
                 success -> {
                     Toast.makeText(requireContext(), success,
                             Toast.LENGTH_SHORT).show();
-                    mActivityUtils.MAP_FRAGMENT.refreshMapMarkers(true, name);
+                    mActivityUtils.MAP_FRAGMENT.refreshGlobalMarkers(true, name);
                     dismiss();
                 },
                 error -> Toast.makeText(requireContext(), error,

@@ -236,10 +236,10 @@ public class FirestoreServices {
         markerData.put("type", type);
         mDb.collection("Users").document(uid)
                 .collection("Markers").add(markerData)
-                .addOnSuccessListener(command -> onSuccess
-                        .accept("Marker saved!"))
-                .addOnFailureListener(e -> onFailure
-                        .accept("Failed to save marker."));
+                .addOnSuccessListener(command ->
+                        onSuccess.accept("Marker saved!"))
+                .addOnFailureListener(e ->
+                        onFailure.accept("Failed to save marker."));
     }
 
     public void addGlobalMarkerDb(String name, String type, GeoPoint coordinates,
@@ -263,11 +263,21 @@ public class FirestoreServices {
 
     public void deleteCustomMarker(String markerId, Consumer<String> onSuccess,
                                    Consumer<String> onFailure) {
-
         if (mCurrentUser == null) return;
         FirebaseFirestore.getInstance().collection("Users")
                 .document(mCurrentUser.getUid())
                 .collection("Markers").document(markerId).delete()
+                .addOnSuccessListener(command -> onSuccess
+                        .accept("Marker was successfully deleted!"))
+                .addOnFailureListener(e -> onFailure
+                        .accept("Error deleting marker"));
+    }
+
+    public void deleteGlobalMarker(String markerName, Consumer<String> onSuccess,
+                                   Consumer<String> onFailure) {
+        if (mCurrentUser == null) return;
+        FirebaseFirestore.getInstance().collection("Locations")
+                .document(markerName).delete()
                 .addOnSuccessListener(command -> onSuccess
                         .accept("Marker was successfully deleted!"))
                 .addOnFailureListener(e -> onFailure
@@ -368,20 +378,35 @@ public class FirestoreServices {
                                 List<Event> eventList = new ArrayList<>();
                                 List<Event> randomEventList;
 
-                                task.getResult().forEach(document -> {
-                                    EventStatus status = EventStatus
-                                            .valueOf(document.getString("status"));
-                                    if (status != EventStatus.ACCEPTED || eventIds == null
-                                            || eventIds.contains(document.getId()))
-                                        return;
+                                if (eventIds == null) {
+                                    task.getResult().forEach(document -> {
+                                        EventStatus status = EventStatus
+                                                .valueOf(document.getString("status"));
+                                        if (status != EventStatus.ACCEPTED)
+                                            return;
 
-                                    Event event = document.toObject(Event.class);
-                                    if (event.getJoinedPeople() >= event.getMaxPeople() ||
-                                            Objects.requireNonNull(document.getString("userId"))
-                                                    .equals(mCurrentUser.getUid()))
-                                        return;
-                                    eventList.add(event);
-                                });
+                                        Event event = document.toObject(Event.class);
+                                        if (event.getJoinedPeople() >= event.getMaxPeople() ||
+                                                Objects.requireNonNull(document.getString("userId"))
+                                                        .equals(mCurrentUser.getUid()))
+                                            return;
+                                        eventList.add(event);
+                                    });
+                                } else {
+                                    task.getResult().forEach(document -> {
+                                        EventStatus status = EventStatus
+                                                .valueOf(document.getString("status"));
+                                        if (status != EventStatus.ACCEPTED || eventIds.contains(document.getId()))
+                                            return;
+
+                                        Event event = document.toObject(Event.class);
+                                        if (event.getJoinedPeople() >= event.getMaxPeople() ||
+                                                Objects.requireNonNull(document.getString("userId"))
+                                                        .equals(mCurrentUser.getUid()))
+                                            return;
+                                        eventList.add(event);
+                                    });
+                                }
 
                                 Collections.shuffle(eventList);
                                 int randomListSize = Math.min(eventList.size(), 10);
@@ -391,6 +416,7 @@ public class FirestoreServices {
                             });
                 });
     }
+
 
     public void getMyEvents(Consumer<List<Event>> onSuccess, Consumer<String> onFailure) {
         if (mCurrentUser == null) {

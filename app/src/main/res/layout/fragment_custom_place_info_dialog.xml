@@ -1,4 +1,4 @@
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_centerVertical="true"
@@ -22,55 +22,37 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="64dp"
-        android:background="@drawable/background_blue"
         android:enabled="false"
         android:inputType="text"
         android:paddingHorizontal="16dp"
-        android:text=""
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:textSize="28sp"
         android:textStyle="bold" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout2"
+
+    <EditText
+        android:id="@+id/placeDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/placeTitle"
         android:layout_marginVertical="16dp"
-        android:orientation="vertical"
-        android:paddingHorizontal="16dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Info:"
-            android:textColor="@color/marian_blue"
-            android:textSize="16sp" />
-
-        <EditText
-            android:id="@+id/placeDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/background_red"
-            android:enabled="false"
-            android:gravity="top|start"
-            android:lines="6"
-            android:overScrollMode="always"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="10dp"
-            android:scrollbars="vertical"
-            android:text=""
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-    </LinearLayout>
+        android:enabled="false"
+        android:gravity="top|start"
+        android:lines="6"
+        android:overScrollMode="always"
+        android:layout_marginHorizontal="16dp"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="8dp"
+        android:scrollbars="vertical"
+        android:textColor="@color/black"
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/saveButton"
         style="@android:style/Widget.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/linearLayout2"
+        android:layout_below="@id/placeDescription"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/background_blue"
@@ -85,7 +67,6 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        android:layout_weight="3"
         android:gravity="center"
         android:orientation="horizontal">
 

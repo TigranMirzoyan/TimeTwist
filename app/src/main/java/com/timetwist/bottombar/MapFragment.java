@@ -1,14 +1,11 @@
 package com.timetwist.bottombar;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +21,9 @@ import com.timetwist.R;
 import com.timetwist.databinding.FragmentMapBinding;
 import com.timetwist.ui.manager.MapHelper;
 import com.timetwist.ui.manager.MapUIManager;
+import com.timetwist.ui.manager.WebViewActivity;
+import com.timetwist.utils.NetworkUtils;
+import com.timetwist.utils.ToastUtils;
 
 public class MapFragment extends Fragment {
     private FragmentMapBinding mBinding;
@@ -75,17 +75,27 @@ public class MapFragment extends Fragment {
         mMapUIManager = new MapUIManager(requireContext(), this, mBinding, mMap, mFusedLocationClient);
         mMapUIManager.configureMap();
         mMapUIManager.configureCompassPlace();
-        mMapUIManager.configureAutocomplete(getChildFragmentManager());
     }
 
-    public void refreshMapMarkers(Boolean deleteOrAdd, String name) {
+    public void refreshCustomMarkers(Boolean deleteOrAdd, String name) {
         if (mMap == null) return;
-        if (deleteOrAdd) mMapUIManager.addCustomMarkers();
+        if (deleteOrAdd) mMapUIManager.addGlobalMarkers();
 
-        mMapUIManager.getCustomMarkers().stream().filter(marker ->
+        mMapUIManager.getGlobalMarkers().stream().filter(marker ->
                 marker.getTitle().equals(name)).findAny().ifPresent(marker -> {
             marker.remove();
-            mMapUIManager.getCustomMarkers().remove(marker);
+            mMapUIManager.getGlobalMarkers().remove(marker);
+        });
+    }
+
+    public void refreshGlobalMarkers(Boolean deleteOrAdd, String name) {
+        if (mMap == null) return;
+        if (deleteOrAdd) mMapUIManager.addGlobalMarkers();
+
+        mMapUIManager.getGlobalMarkers().stream().filter(marker ->
+                marker.getTitle().equals(name)).findAny().ifPresent(marker -> {
+            marker.remove();
+            mMapUIManager.getGlobalMarkers().remove(marker);
         });
     }
 
@@ -122,24 +132,15 @@ public class MapFragment extends Fragment {
         mMap.setOnMapClickListener(null);
     }
 
-    public void configureWebView(String url) {
-        mBinding.webView.setVisibility(View.VISIBLE);
-        mBinding.webView.loadUrl(url);
-        WebSettings webSettings = mBinding.webView.getSettings();
+    public void openWebViewActivity(String url) {
+        if (NetworkUtils.isInternetDisconnected(requireContext())) {
+            ToastUtils.show(requireContext(), "Internet required");
+            return;
+        }
 
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setLoadWithOverviewMode(true);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
-
-        mBinding.webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                view.loadUrl(request.getUrl().toString());
-                return true;
-            }
-        });
+        Intent intent = new Intent(requireContext(), WebViewActivity.class);
+        intent.putExtra("url", url);
+        startActivity(intent);
     }
 
     @Override

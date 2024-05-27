@@ -11,16 +11,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -29,9 +27,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.timetwist.R;
 import com.timetwist.databinding.FragmentMapBinding;
@@ -45,7 +40,7 @@ import com.timetwist.utils.NetworkUtils;
 import com.timetwist.utils.ToastUtils;
 import com.timetwist.utils.WikipediaAPI;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -59,6 +54,8 @@ public class MapUIManager {
     private final FirestoreServices mFirestoreServices;
     private final List<Marker> mGlobalMarkers = new LinkedList<>();
     private final List<Marker> mCustomMarkers = new LinkedList<>();
+    private final List<String> mGlobalMarkerNames = new ArrayList<>();
+
     private final GoogleMap mMap;
     private final FirebaseAuth mAuth;
     private final Context mContext;
@@ -94,6 +91,7 @@ public class MapUIManager {
         addMarkersFromFirebase();
         configureSnippedBeingInvisible();
         configureAdmin();
+        configureAutoCompleteTextView();
 
         mBinding.addMarker.setOnClickListener(v -> configureAddMarkerButton());
         mBinding.myLocation.setOnClickListener(__ -> updateLocation(() ->
@@ -203,6 +201,16 @@ public class MapUIManager {
         locationCompass.setLayoutParams(layoutParams);
     }
 
+    public void configureAutoCompleteTextView() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(mContext,
+                android.R.layout.simple_dropdown_item_1line, mGlobalMarkerNames);
+        mBinding.searchView.setAdapter(adapter);
+        mBinding.searchView.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedMarkerName = (String) parent.getItemAtPosition(position);
+            zoomToMarkerByName(selectedMarkerName);
+        });
+    }
+
     @SuppressLint("MissingPermission")
     public void updateLocation(Runnable ifLocationIsNull) {
         if (!MapHelper.hasLocationPermissions(mContext)) return;
@@ -225,29 +233,6 @@ public class MapUIManager {
                         R.drawable.my_location_not_visible));
     }
 
-    public void configureAutocomplete(FragmentManager fragmentManager) {
-        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
-                fragmentManager.findFragmentById(R.id.autocomplete_fragment);
-
-        if (autocompleteFragment == null) return;
-
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID,
-                Place.Field.NAME, Place.Field.LAT_LNG));
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(@NonNull Place place) {
-                LatLng latLng = place.getLatLng();
-                if (latLng == null || mMap == null) return;
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, LAT_LNG_ZOOM));
-            }
-
-            @Override
-            public void onError(@NonNull Status status) {
-                Log.e("MapUIManager", "Autocomplete error: "
-                        + status.getStatusMessage());
-            }
-        });
-    }
 
     private void addMarkersFromFirebase() {
         showProgressBar();
@@ -258,7 +243,7 @@ public class MapUIManager {
         enableFragmentInteraction();
     }
 
-    private void addGlobalMarkers() {
+    public void addGlobalMarkers() {
         mFirestoreServices.getGlobalMarkers((latLng, name, type) -> {
             try {
                 Marker marker = mMap.addMarker(new MarkerOptions()
@@ -269,6 +254,7 @@ public class MapUIManager {
                 marker.setTag("firebase");
                 if (mChangeMarkers) marker.setVisible(false);
                 mGlobalMarkers.add(marker);
+                mGlobalMarkerNames.add(name);
             } catch (IllegalAccessException | NoSuchFieldException e) {
                 throw new RuntimeException(e);
             }
@@ -425,5 +411,8 @@ public class MapUIManager {
 
     public List<Marker> getCustomMarkers() {
         return mCustomMarkers;
+    }
+    public List<Marker> getGlobalMarkers() {
+        return mGlobalMarkers;
     }
 }

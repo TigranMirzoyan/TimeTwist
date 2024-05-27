@@ -61,7 +61,7 @@
             <TextView
                 android:id="@+id/readMore"
                 android:layout_width="0dp"
-                android:layout_height="64dp"
+                android:layout_height="55dp"
                 android:layout_marginStart="5dp"
                 android:layout_weight="0.7"
                 android:gravity="center_vertical"
@@ -74,7 +74,7 @@
                 android:id="@+id/textSpeech"
                 style="@android:style/Widget.Button"
                 android:layout_width="0dp"
-                android:layout_height="60dp"
+                android:layout_height="55dp"
                 android:layout_weight="0.7"
                 android:background="@drawable/on_speaking" />
 
@@ -82,10 +82,21 @@
                 android:id="@+id/favorite"
                 style="@android:style/Widget.Button"
                 android:layout_width="0dp"
-                android:layout_height="60dp"
+                android:layout_height="55dp"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1.3"
-                android:background="@drawable/favorite_button_not_clicked" />
+                android:background="@drawable/favorite_button_not_clicked"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/delete"
+                style="@android:style/Widget.Button"
+                android:layout_width="0dp"
+                android:layout_height="55dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1.3"
+                android:background="@drawable/delete_btn"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

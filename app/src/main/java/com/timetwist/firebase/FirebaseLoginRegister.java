@@ -24,11 +24,6 @@ public class FirebaseLoginRegister {
 
     public void loginUser(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-            if (mAuth.getCurrentUser() != null && !mAuth.getCurrentUser().isEmailVerified()) {
-                mAuth.signOut();
-                ToastUtils.show(mContext, "Email isn't verified");
-                return;
-            }
             if (!task.isSuccessful()) {
                 ToastUtils.show(mContext, "Login failed: " +
                         Objects.requireNonNull(task.getException()).getMessage());

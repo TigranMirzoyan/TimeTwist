@@ -9,10 +9,18 @@
     tools:context=".info.AddMarkerWithKeyFragment">
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fill In The Lines"
+        android:textColor="@color/marian_blue"
+        android:textSize="40sp"
+        android:textStyle="bold" />
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"
         android:text="Key"
         android:textColor="@color/marian_blue" />
@@ -99,7 +107,7 @@
         <HorizontalScrollView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.5">
+            android:layout_weight="0.3">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -112,16 +120,16 @@
                     style="@android:style/Widget.Button"
                     android:layout_width="64dp"
                     android:layout_height="64dp"
+                    android:background="@drawable/default_marker_button"
                     android:text="default"
-                    android:textColor="@color/black"
-                    android:background="@drawable/default_marker_button" />
+                    android:textColor="@color/white" />
 
                 <Button
                     android:id="@+id/church"
                     style="@android:style/Widget.Button"
                     android:layout_width="64dp"
-                    android:layout_marginStart="8dp"
                     android:layout_height="64dp"
+                    android:layout_marginStart="8dp"
                     android:background="@drawable/church_button" />
 
                 <Button
@@ -149,7 +157,7 @@
             android:layout_height="50dp"
             android:layout_gravity="center_vertical"
             android:layout_marginHorizontal="10dp"
-            android:layout_weight="1.5"
+            android:layout_weight="1.7"
             android:background="@drawable/background_red"
             android:gravity="center"
             android:text="Empty"

@@ -44,7 +44,8 @@ public class AddMarkerWithKeyFragment extends Fragment {
 
         setTypeSelectionListeners();
         mBinding.save.setOnClickListener(v -> handleSaveButtonClick());
-        mBinding.back.setOnClickListener(v -> mActivityUtils.replace(mActivityUtils.HOME_FRAGMENT, requireContext()));
+        mBinding.back.setOnClickListener(v ->
+                mActivityUtils.replace(mActivityUtils.HOME_FRAGMENT, requireContext()));
     }
 
     private void setTypeSelectionListeners() {
@@ -100,7 +101,7 @@ public class AddMarkerWithKeyFragment extends Fragment {
                     success -> {
                         ToastUtils.show(requireContext(), success);
                         ActivityUtils.getInstance().MAP_FRAGMENT
-                                .refreshMapMarkers(true, name);
+                                .refreshCustomMarkers(true, name);
                         clearInputFields();
                     },
                     error -> ToastUtils.show(requireContext(), error));

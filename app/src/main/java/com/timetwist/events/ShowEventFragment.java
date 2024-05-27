@@ -108,10 +108,12 @@ public class ShowEventFragment extends RecyclerView.Adapter<ShowEventFragment.My
 
     private void configureVisibility(MyViewHolder holder) {
         holder.mBinding.join.setVisibility(mEventState == 0 ? View.VISIBLE : View.GONE);
+        holder.mBinding.email.setVisibility(mEventState == 0 ? View.GONE : View.VISIBLE);
         holder.mBinding.delete.setVisibility(mEventState == 1 ? View.VISIBLE : View.GONE);
         holder.mBinding.status.setVisibility(mEventState == 1 ? View.VISIBLE : View.GONE);
         holder.mBinding.email.setVisibility(mEventState == 1 ? View.GONE : View.VISIBLE);
         holder.mBinding.username.setVisibility(mEventState == 1 ? View.GONE : View.VISIBLE);
         holder.mBinding.leave.setVisibility(mEventState == 2 ? View.VISIBLE : View.GONE);
+        holder.mBinding.email.setVisibility(mEventState == 2 ? View.VISIBLE : View.GONE);
     }
 }

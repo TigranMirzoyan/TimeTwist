@@ -77,6 +77,7 @@ public class GlobalPlaceInfoDialog extends DialogFragment {
             mTextToSpeech.stop();
         });
 
+        configureAdmin();
         initializeTextToSpeech();
         mBinding.favorite.setOnClickListener(v -> configureFavoriteButton());
         mBinding.readMore.setOnClickListener(v -> configureReadMoreButton());
@@ -87,6 +88,29 @@ public class GlobalPlaceInfoDialog extends DialogFragment {
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
 
         return dialog;
+    }
+
+    private void configureAdmin() {
+        mActivityUtils.ifUserAdmin(requireContext(),
+                () -> configureButtonsVisibility(true),
+                () -> configureButtonsVisibility(false));
+    }
+
+    private void configureButtonsVisibility(Boolean check) {
+        if (!check) {
+            mBinding.delete.setVisibility(View.GONE);
+            mBinding.favorite.setVisibility(View.VISIBLE);
+            return;
+        }
+        mBinding.delete.setVisibility(View.VISIBLE);
+        mBinding.favorite.setVisibility(View.GONE);
+        mBinding.delete.setOnClickListener(v -> mFirestoreServices.deleteGlobalMarker(mTitle,
+                success -> {
+                    ToastUtils.show(requireContext(), success);
+                    mActivityUtils.MAP_FRAGMENT.refreshGlobalMarkers(false, mTitle);
+                    dismiss();
+                },
+                error -> ToastUtils.show(requireContext(), error)));
     }
 
     private void initializeTextToSpeech() {
@@ -159,7 +183,7 @@ public class GlobalPlaceInfoDialog extends DialogFragment {
         }
         String url = "https://en.wikipedia.org/wiki/"
                 + mTitle.replaceAll(" ", "_");
-        mActivityUtils.MAP_FRAGMENT.configureWebView(url);
+        mActivityUtils.MAP_FRAGMENT.openWebViewActivity(url);
         dismiss();
     }
 

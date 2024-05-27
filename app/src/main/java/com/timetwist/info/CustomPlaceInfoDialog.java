@@ -3,7 +3,6 @@ package com.timetwist.info;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -76,8 +75,8 @@ public class CustomPlaceInfoDialog extends DialogFragment {
         mFirestoreServices.deleteCustomMarker(mMarkerId,
                 success -> {
                     ToastUtils.show(requireContext(), success);
+                    mActivityUtils.MAP_FRAGMENT.refreshCustomMarkers(false, mTitle);
                     dismiss();
-                    mActivityUtils.MAP_FRAGMENT.refreshMapMarkers(false, mTitle);
                 },
                 error -> ToastUtils.show(requireContext(), error));
     }
@@ -131,8 +130,8 @@ public class CustomPlaceInfoDialog extends DialogFragment {
                 success -> {
                     ToastUtils.show(requireContext(), success);
                     dismiss();
-                    mActivityUtils.MAP_FRAGMENT.refreshMapMarkers(false, mTitle);
-                    mActivityUtils.MAP_FRAGMENT.refreshMapMarkers(true, newTitle);
+                    mActivityUtils.MAP_FRAGMENT.refreshCustomMarkers(false, mTitle);
+                    mActivityUtils.MAP_FRAGMENT.refreshCustomMarkers(true, newTitle);
                 },
                 error -> ToastUtils.show(requireContext(), error));
     }

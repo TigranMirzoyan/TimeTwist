@@ -47,22 +47,10 @@ public class CreateMarker extends DialogFragment {
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mFirestoreServices = FirestoreServices.getInstance();
         mActivityUtils = ActivityUtils.getInstance();
-
-        mBinding.church.setOnClickListener(v -> {
-            mType = "church";
-            mBinding.showMarkerName.setText("Church");
-        });
-        mBinding.prehistoricSite.setOnClickListener(v -> {
-            mType = "temple";
-            mBinding.showMarkerName.setText("Temple");
-        });
-        mBinding.tree.setOnClickListener(v -> {
-            mType = "nature";
-            mBinding.showMarkerName.setText("Nature");
-        });
+        setTypeSelectionListeners();
 
         mBinding.close.setOnClickListener(v -> dismiss());
-        mBinding.save.setOnClickListener(v -> handleSaveButtonClick());
+        mBinding.save.setOnClickListener(v -> configureSaveButton());
 
         builder.setView(view);
         AlertDialog dialog = builder.create();
@@ -72,7 +60,19 @@ public class CreateMarker extends DialogFragment {
         return dialog;
     }
 
-    private void handleSaveButtonClick() {
+    private void setTypeSelectionListeners() {
+        mBinding.church.setOnClickListener(v -> setType("church", "Church"));
+        mBinding.prehistoricSite.setOnClickListener(v -> setType("temple", "Temple"));
+        mBinding.tree.setOnClickListener(v -> setType("nature", "Nature"));
+        mBinding.defaultMarker.setOnClickListener(v -> setType("default_marker", "Default"));
+    }
+
+    private void setType(String type, String displayName) {
+        mType = type;
+        mBinding.showMarkerName.setText(displayName);
+    }
+
+    private void configureSaveButton() {
         if (NetworkUtils.isInternetDisconnected(requireContext())) {
             ToastUtils.show(requireContext(), "Internet required");
             return;
@@ -101,7 +101,7 @@ public class CreateMarker extends DialogFragment {
                 success -> {
                     Toast.makeText(requireContext(), success,
                             Toast.LENGTH_SHORT).show();
-                    mActivityUtils.MAP_FRAGMENT.refreshMapMarkers(true, name);
+                    mActivityUtils.MAP_FRAGMENT.refreshCustomMarkers(true, name);
                     dismiss();
                 },
                 error -> Toast.makeText(requireContext(), error,
