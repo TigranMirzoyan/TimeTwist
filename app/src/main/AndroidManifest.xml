@@ -22,12 +22,19 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/my_map_Api_key" />
 
-        <activity android:name=".ui.manager.WebViewActivity" />
-        <activity android:name=".account.RegisterActivity" />
-        <activity android:name=".account.LoginActivity" />
+        <activity
+            android:name=".ui.manager.WebViewActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".account.RegisterActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".account.LoginActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
