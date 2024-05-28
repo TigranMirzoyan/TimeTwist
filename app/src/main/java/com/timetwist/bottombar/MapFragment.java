@@ -102,12 +102,12 @@ public class MapFragment extends Fragment {
 
     public void refreshCustomMarkers(Boolean deleteOrAdd, String name) {
         if (mMap == null) return;
-        if (deleteOrAdd) mMapUIManager.addGlobalMarkers();
+        if (deleteOrAdd) mMapUIManager.addCustomMarkers();
 
-        mMapUIManager.getGlobalMarkers().stream().filter(marker ->
+        mMapUIManager.getCustomMarkers().stream().filter(marker ->
                 marker.getTitle().equals(name)).findAny().ifPresent(marker -> {
             marker.remove();
-            mMapUIManager.getGlobalMarkers().remove(marker);
+            mMapUIManager.getCustomMarkers().remove(marker);
         });
     }
 
