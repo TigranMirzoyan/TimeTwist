@@ -25,14 +25,18 @@
         <activity
             android:name=".ui.manager.WebViewActivity"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".account.RegisterActivity"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".account.LoginActivity"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".MainActivity"
+            android:theme="@style/Theme.App.SplashScreen"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>

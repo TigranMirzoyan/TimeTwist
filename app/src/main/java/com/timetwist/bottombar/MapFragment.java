@@ -97,7 +97,7 @@ public class MapFragment extends Fragment {
     private void setupMapUIManager() {
         mMapUIManager = new MapUIManager(requireContext(), this, mBinding, mMap, mFusedLocationClient);
         mMapUIManager.configureMap();
-        mMapUIManager.configureCompassPlace();
+        mMapUIManager.configureUIPlace();
     }
 
     public void refreshCustomMarkers(Boolean deleteOrAdd, String name) {

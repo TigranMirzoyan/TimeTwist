@@ -91,7 +91,7 @@ public class MakeEventFragment extends Fragment {
             mBinding.name.setAdapter(adapter);
             mGlobalMarkerNames.clear();
             mGlobalMarkerNames.addAll(names);
-            if (names.isEmpty()) ToastUtils.show(requireContext(), "No names available");
+            if (names.isEmpty()) ToastUtils.show(requireContext(), "No global markers available");
         }, e -> ToastUtils.show(requireContext(), e));
     }
 

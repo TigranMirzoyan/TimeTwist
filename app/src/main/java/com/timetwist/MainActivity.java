@@ -3,6 +3,7 @@ package com.timetwist;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.splashscreen.SplashScreen;
 
 import com.timetwist.databinding.ActivityMainBinding;
 import com.timetwist.interfaces.OnMarkerSelectedListener;
@@ -21,7 +22,15 @@ public class MainActivity extends AppCompatActivity implements OnMarkerSelectedL
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
         super.onCreate(savedInstanceState);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         mBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
         mActivityUtils = ActivityUtils.getInstance();

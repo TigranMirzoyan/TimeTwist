@@ -46,8 +46,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class MapUIManager {
-    private static final int COMPASS_ID = 1;
+    private static final int COMPASS_TOOLBAR_ID = 1;
     private static final int LOCATION_COMPASS_ID = 5;
+    private static final int LOCATION_TOOLBAR_ID = 4;
     private static final int LAT_LNG_ZOOM = 15;
     private final FragmentMapBinding mBinding;
     private final ActivityUtils mActivityUtils;
@@ -187,18 +188,28 @@ public class MapUIManager {
         mMap.setOnMapClickListener(null);
     }
 
-    public void configureCompassPlace() {
+    public void configureUIPlace() {
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
-        View compass = mBinding.getRoot().findViewById(COMPASS_ID);
-        if (compass == null) return;
-        View locationCompass = ((View) compass.getParent()).findViewById(LOCATION_COMPASS_ID);
-        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+        View ui = mBinding.getRoot().findViewById(COMPASS_TOOLBAR_ID);
+        if (ui == null) return;
+
+        View locationCompass = ((View) ui.getParent()).findViewById(LOCATION_COMPASS_ID);
+        RelativeLayout.LayoutParams layoutCompassParams = (RelativeLayout.LayoutParams)
                 locationCompass.getLayoutParams();
-        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
-        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-        layoutParams.setMargins(30, 0, 0, 200);
-        locationCompass.setLayoutParams(layoutParams);
+        layoutCompassParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+        layoutCompassParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        layoutCompassParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        layoutCompassParams.setMargins(30, 0, 0, 200);
+        locationCompass.setLayoutParams(layoutCompassParams);
+
+        View locationToolbar = ((View) ui.getParent()).findViewById(LOCATION_TOOLBAR_ID);
+        RelativeLayout.LayoutParams layoutToolbarParams = (RelativeLayout.LayoutParams)
+                locationToolbar.getLayoutParams();
+        layoutToolbarParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+        layoutToolbarParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        layoutToolbarParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+        layoutToolbarParams.setMargins(0, 0, 30, 600);
+        locationToolbar.setLayoutParams(layoutToolbarParams);
     }
 
     public void configureAutoCompleteTextView() {

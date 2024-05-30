@@ -39,10 +39,10 @@ dependencies {
     implementation(libs.bundles.firebase)
     implementation(libs.bundles.google)
     implementation(libs.bundles.network)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
     implementation(libs.bottom.bar)
-    implementation(libs.gson)
-    implementation(libs.lottie.files)
 }
